@@ -1,0 +1,211 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CheckTokenInput {
+  """The Token To Check"""
+  token: String!
+
+  """The userId To Check"""
+  userId: String!
+}
+
+input CreateProductInput {
+  """description of the product"""
+  description: String!
+  imageUrl: String!
+
+  """price of the product"""
+  price: Int!
+
+  """Title of the product"""
+  title: String!
+
+  """CsrfToken"""
+  token: String!
+}
+
+input CreateUserInput {
+  """email"""
+  email: String!
+
+  """password"""
+  password: String!
+
+  """username"""
+  username: String!
+}
+
+type Csrf {
+  """The Token CSRF"""
+  token: String!
+
+  """The User Id"""
+  userId: String!
+}
+
+type ErrorHandler {
+  """A message for the error"""
+  message: String!
+}
+
+union LoginUnionResult = ErrorHandler | jwtToken
+
+input LoginUserInput {
+  """Email"""
+  email: String!
+
+  """password"""
+  password: String!
+}
+
+input LoginVerifyToken {
+  """Token"""
+  token: String!
+}
+
+type Mutation {
+  addToCart(id: String!): Product!
+  createCsrfToken(userId: String!): Csrf!
+  createOrder: Order!
+  createProduct(createProductInput: CreateProductInput!): Product!
+  register(createUserInput: CreateUserInput!): User!
+  removeItemFromCart(removeItemFromCartInput: RemoveItemFromCartInput!): Product!
+  removeProduct(removeProductInput: RemoveProductInput!): Product!
+  removeUser(id: String!): User!
+  resetPassword(resetPasswordInput: ResetPasswordInput!): User!
+  updateProduct(updateProductInput: UpdateProductInput!): Product!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+type Order {
+  userId: String!
+}
+
+type Product {
+  """id of the product"""
+  _id: String!
+
+  """description of the product"""
+  description: String!
+
+  """image of the product"""
+  imageUrl: String!
+
+  """price of the product"""
+  price: Int!
+
+  """Quantity of the product"""
+  quantity: Int
+
+  """Title of the product"""
+  title: String!
+
+  """user Id"""
+  userId: String!
+}
+
+input ProductFindOptions {
+  """Limit the number of received Products..."""
+  limit: Int!
+
+  """skip the number of the Products..."""
+  skip: Int!
+}
+
+type Query {
+  checkToken(checkTokenInput: CheckTokenInput!): Csrf!
+  findProductById(id: String!): Product!
+  findProductByTitle(title: String!): [Product!]!
+  forgetPassword(email: String!): User!
+  login(loginUserInput: LoginUserInput!): LoginUnionResult!
+  order(id: Int!): Order!
+  orders: [Order!]!
+  products(productFindOptions: ProductFindOptions!): [Product!]!
+  productsOfUser: [Product!]!
+  userFindByEmail(email: String!): User!
+  userFindById(id: String!): User!
+  users: [User!]!
+  verifyToken(loginVerifyToken: LoginVerifyToken!): User!
+}
+
+input RemoveItemFromCartInput {
+  """Product ID"""
+  productId: String!
+
+  """Quantity"""
+  quantity: Int!
+}
+
+input RemoveProductInput {
+  productId: String!
+  token: String!
+  userId: String!
+}
+
+input ResetPasswordInput {
+  """Password"""
+  password: String!
+
+  """token"""
+  token: String!
+
+  """userId"""
+  userId: String!
+}
+
+input UpdateProductInput {
+  """Id of the product"""
+  _id: String!
+
+  """description of the product"""
+  description: String
+
+  """image Url of the product"""
+  imageUrl: String
+
+  """price of the product"""
+  price: Int
+
+  """Title of the product"""
+  title: String
+
+  """CsrfToken"""
+  token: String!
+}
+
+input UpdateUserInput {
+  """ID"""
+  _id: String!
+
+  """email"""
+  email: String
+
+  """password"""
+  password: String
+
+  """username"""
+  username: String
+}
+
+type User {
+  """Id of The user"""
+  _id: String!
+
+  """email of the user"""
+  email: String!
+
+  """password of the user"""
+  password: String!
+
+  """username of the user"""
+  username: String!
+}
+
+type jwtToken {
+  """Access Token for user loggedin"""
+  access_token: String!
+
+  """User ID"""
+  userId: String!
+}
