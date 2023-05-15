@@ -109,14 +109,21 @@ input ProductFindOptions {
   """Limit the number of received Products..."""
   limit: Int!
 
+  """ProductId so That we can find related Product"""
+  productId: String
+
   """skip the number of the Products..."""
   skip: Int!
+
+  """Filter Words"""
+  words: String
 }
 
 type Query {
   checkToken(checkTokenInput: CheckTokenInput!): Csrf!
+  countProducts(productFindOptions: ProductFindOptions!): Int!
   findProductById(id: String!): Product!
-  findProductByTitle(title: String!): [Product!]!
+  findRecommendedProducts(productFindOptions: ProductFindOptions!): [Product!]!
   forgetPassword(email: String!): User!
   login(loginUserInput: LoginUserInput!): LoginUnionResult!
   order(id: Int!): Order!

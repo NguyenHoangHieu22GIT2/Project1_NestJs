@@ -26,18 +26,31 @@ export class ProductsResolver {
   }
 
   @Query(() => [Product], { name: 'products' })
-  findAll(@Args('productFindOptions') productFindOptions: ProductFindOptions) {
-    return this.productsService.find(productFindOptions);
+  async findAll(
+    @Args('productFindOptions') productFindOptions: ProductFindOptions,
+  ) {
+    const product = await this.productsService.find(productFindOptions);
+    console.log(product);
+    return product;
+  }
+
+  @Query(() => Int, { name: 'countProducts' })
+  findNumberOfAllProducts(
+    @Args('productFindOptions') productFindOptions: ProductFindOptions,
+  ) {
+    return this.productsService.findNumberOfAllProducts(productFindOptions);
+  }
+
+  @Query(() => [Product], { name: 'findRecommendedProducts' })
+  findRecommendedProducts(
+    @Args('productFindOptions') productFindOptions: ProductFindOptions,
+  ) {
+    return this.productsService.findRecommendedProducts(productFindOptions);
   }
 
   @Query(() => [Product], { name: 'productsOfUser' })
   findProductsOfUser(@userDecorator() user: User) {
     return this.productsService.findAllOfUsers(user);
-  }
-
-  @Query(() => [Product], { name: 'findProductByTitle' })
-  findOne(@Args('title', { type: () => String }) title: string) {
-    return this.productsService.findByTitle(title);
   }
 
   @Query(() => Product, { name: 'findProductById' })

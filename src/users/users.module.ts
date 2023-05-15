@@ -8,6 +8,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ProductsModule } from 'src/products/products.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AuthResolver } from './auth.resolver';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   providers: [
@@ -19,19 +20,29 @@ import { AuthResolver } from './auth.resolver';
   ],
   imports: [
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '60h' },
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          global: true,
+          secret: configService.get('JWT_SECRET'),
+          signOptions: { expiresIn: '60h' },
+        };
+      },
     }),
     ProductsModule,
-    MailerModule.forRoot({
-      transport: {
-        service: 'gmail',
-        auth: {
-          user: process.env.APP_EMAIL_GMAIL,
-          pass: process.env.APP_PASSWORD_GMAIL,
-        },
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          transport: {
+            service: 'gmail',
+            auth: {
+              user: configService.get<string>('APP_EMAIL_GMAIL'),
+              pass: configService.get<string>('APP_PASSWORD_GMAIL'),
+            },
+          },
+        };
       },
     }),
   ],

@@ -50,7 +50,10 @@ export class AuthService {
     if (token <= 1000) {
       token += 1000;
     }
-    const hashedPassword = await bcrypt.hash(password, process.env.BCRYPT_HASH);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      +process.env.BCRYPT_HASH,
+    );
     this.nodemailer.sendMail({
       from: 'hoanghieufro@gmail.com',
       to: email,
@@ -84,9 +87,8 @@ export class AuthService {
     }
     const doMatch = await bcrypt.compare(password, user.password);
     if (!doMatch) {
-      throw new UnauthorizedException("Credentials don't meet");
+      throw new UnauthorizedException("Credentials don't meet my boy");
     }
-    console.log(user);
     const payload = { email, _id: user._id };
     return {
       access_token: await this.jwtService.signAsync(payload, {

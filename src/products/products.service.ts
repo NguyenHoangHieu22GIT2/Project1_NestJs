@@ -1,12 +1,13 @@
 import {
-  BadRequestException,
+  NotFoundException,
   HttpException,
   HttpStatus,
   Injectable,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { FilterQuery, Model } from 'mongoose';
 import { User } from 'src/users/entities/user.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
@@ -14,6 +15,7 @@ import { Product } from './entities/product.entity';
 import { CsrfService } from 'src/csrf/csrf.service';
 import { RemoveProductInput } from './dto/remove-product.input';
 import { ProductFindOptions } from './dto/product-find-options.input';
+import { GraphQLError } from 'graphql';
 
 @Injectable()
 export class ProductsService {
@@ -27,24 +29,61 @@ export class ProductsService {
   }
 
   find(productFindOptions: ProductFindOptions) {
+    const filters: FilterQuery<Product> = {};
+
+    if (productFindOptions.words) {
+      filters.$text = {
+        $search: productFindOptions.words,
+      };
+    }
     return this.productModel
-      .find()
+      .find(filters)
+      .sort({ _id: -1 })
       .skip(productFindOptions.skip)
       .limit(productFindOptions.limit);
+  }
+
+  async findRecommendedProducts(productFindOptions: ProductFindOptions) {
+    const product = await this.productModel.findById(
+      productFindOptions.productId,
+    );
+    if (!product) {
+      throw new NotFoundException('Product Not Found!');
+    }
+    return this.productModel
+      .find({
+        _id: { $ne: productFindOptions.productId },
+      })
+      .sort({ _id: -1 })
+      .skip(productFindOptions.skip)
+      .limit(productFindOptions.limit);
+  }
+
+  findNumberOfAllProducts(productFindOptions: ProductFindOptions) {
+    const filters: FilterQuery<Product> = {};
+
+    if (productFindOptions.words) {
+      filters.$text = {
+        $search: productFindOptions.words,
+      };
+    }
+    return this.productModel.find(filters).count();
   }
 
   findAllOfUsers(user: User) {
     return this.productModel.find({ userId: user._id });
   }
-  findByTitle(title: string) {
-    const regex = new RegExp(`\\b${title}\\b`, 'i');
-    return this.productModel.find({
-      title: regex,
-    });
-  }
 
-  findById(id: string) {
-    return this.productModel.findById(id);
+  async findById(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new GraphQLError('Product ID is wrong...');
+    }
+    const result = await this.productModel.findById(id);
+    console.log(result.errors);
+    if (result.errors) {
+      throw new BadRequestException('No Product Found!');
+    }
+    return result;
   }
 
   async update(updateProductInput: UpdateProductInput, user: User) {
@@ -53,6 +92,7 @@ export class ProductsService {
     if (!product) {
       throw new BadRequestException('Product not found!');
     }
+
     if (product.userId !== user._id)
       throw new BadRequestException('Not your products fools');
     return this.productModel.findByIdAndUpdate(
