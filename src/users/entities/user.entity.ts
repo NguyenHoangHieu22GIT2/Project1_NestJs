@@ -1,12 +1,13 @@
 import { BadRequestException } from '@nestjs/common';
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Schema as schemaType } from 'mongoose'
+import { SchemaType, Schema as schemaType } from 'mongoose';
 import { HydratedDocument } from 'mongoose';
+import { Product } from 'src/products/entities/product.entity';
 
 export type UserDocument = HydratedDocument<User>;
 
-type cartItem = { productId: schemaType.Types.ObjectId, quantity: number };
+type cartItem = { productId: schemaType.Types.ObjectId; quantity: number };
 
 @ObjectType()
 @Schema()
@@ -30,66 +31,84 @@ export class User {
   token: string;
 
   @Prop({ required: false })
-  tokenDate: Date
+  tokenDate: Date;
 
   @Prop({
     type: {
-      items: [{
-        productId: { type: schemaType.Types.ObjectId, required: true, ref: "Product", _id: false },
-        quantity: { type: Number, required: true, _id: false },
-        _id: false
-      }]
-      , _id: false
+      items: [
+        {
+          productId: {
+            type: schemaType.Types.ObjectId,
+            required: true,
+            ref: 'Product',
+            _id: false,
+          },
+          quantity: { type: Number, required: true, _id: false },
+          _id: false,
+        },
+      ],
+      _id: false,
     },
     required: true,
-    default: { items: [] }
+    default: { items: [] },
   })
   cart: {
     items: {
       productId: string;
       quantity: number;
-    }[]
-  }
+    }[];
+  };
 
-  addToCart: (productId: string) => {}
-  removeItemFromCart: (productId: string, quantity: number) => {}
-  clearCart: () => {}
+  addToCart: (productId: string) => {};
+  removeItemFromCart: (productId: string, quantity: number) => {};
+  clearCart: () => {};
 }
 const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.methods.addToCart = function(productId: string) {
-  const productInCart = this.cart.items.find((item: cartItem) => item.productId.toString() === productId.toString()) as cartItem
-  const productInCartIndex = this.cart.items.findIndex((item: cartItem) => item.productId.toString() === productId.toString()) as number
-  const cartItems = [...this.cart.items]
-  let newQuantity = 1
+UserSchema.methods.addToCart = function (productId: string) {
+  const productInCart = this.cart.items.find(
+    (item: cartItem) => item.productId.toString() === productId.toString(),
+  ) as cartItem;
+  const productInCartIndex = this.cart.items.findIndex(
+    (item: cartItem) => item.productId.toString() === productId.toString(),
+  ) as number;
+  const cartItems = [...this.cart.items];
+  let newQuantity = 1;
   if (productInCartIndex >= 0) {
     productInCart.quantity += newQuantity;
     cartItems[productInCartIndex] = productInCart;
   } else {
     cartItems.push({
       productId: productId,
-      quantity: newQuantity
-    })
+      quantity: newQuantity,
+    });
   }
 
   this.cart.items = cartItems;
-  return this.save()
-}
+  return this.save();
+};
 
-UserSchema.methods.removeItemFromCart = function(productId: string, quantity: number) {
+UserSchema.methods.removeItemFromCart = function (
+  productId: string,
+  quantity: number,
+) {
   const productInCart: cartItem = this.cart.items.find((item: cartItem) => {
-    return item.productId.toString() === productId.toString()
-  })
-  const productInCartIndex: number = this.cart.items.findIndex((item: cartItem) => {
-    return item.productId.toString() === productId.toString()
-  })
+    return item.productId.toString() === productId.toString();
+  });
+  const productInCartIndex: number = this.cart.items.findIndex(
+    (item: cartItem) => {
+      return item.productId.toString() === productId.toString();
+    },
+  );
   if (productInCartIndex < 0) {
-    throw new BadRequestException("No Product found!");
+    throw new BadRequestException('No Product found!');
   }
   let calculatedQuantity = productInCart.quantity - quantity;
   let cartItems = [...this.cart.items];
   if (calculatedQuantity <= 0) {
-    cartItems = cartItems.filter((item: cartItem) => item.productId.toString() !== productId.toString())
+    cartItems = cartItems.filter(
+      (item: cartItem) => item.productId.toString() !== productId.toString(),
+    );
   } else {
     productInCart.quantity -= quantity;
     cartItems[productInCartIndex] = productInCart;
@@ -97,14 +116,12 @@ UserSchema.methods.removeItemFromCart = function(productId: string, quantity: nu
 
   this.cart.items = cartItems;
 
-  return this.save()
+  return this.save();
+};
 
-}
+UserSchema.methods.clearCart = function () {
+  this.cart.items = [];
+  return this.save();
+};
 
-UserSchema.methods.clearCart = function() {
-  this.cart.items = []
-  return this.save()
-}
-
-export { UserSchema }
-
+export { UserSchema };

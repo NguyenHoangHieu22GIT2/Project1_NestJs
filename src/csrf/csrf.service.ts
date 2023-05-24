@@ -8,12 +8,13 @@ import { randomBytes } from 'crypto';
 export class CsrfService {
   constructor(
     @InjectModel(Csrf.name) private readonly csrfModel: Model<Csrf>,
-  ) {}
+  ) { }
 
   async createToken(userId: string) {
-    await this.removeToken(userId);
-    const token = randomBytes(12).toString('hex');
-    return this.csrfModel.create({ token, userId });
+    return this.removeToken(userId).then(() => {
+      const token = randomBytes(12).toString('hex');
+      return this.csrfModel.create({ token, userId });
+    });
   }
 
   async verifyToken(token: string, userId: string) {

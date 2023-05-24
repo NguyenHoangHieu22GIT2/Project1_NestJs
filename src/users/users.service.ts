@@ -6,11 +6,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { ProductsService } from 'src/products/products.service';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { User, UserDocument } from './entities/user.entity';
+import { CsrfService } from 'src/csrf/csrf.service';
+import { GetCartItems } from './dto/get-cart-items.input';
 
 function checkUser(user: UserDocument) {
   if (!user) throw new NotFoundException('User not found!');
@@ -23,9 +25,10 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @Inject(forwardRef(() => ProductsService))
     private readonly productService: ProductsService,
-  ) {}
-  async create(createUserInput: CreateUserInput, token: string) {
-    return this.userModel.create({ ...createUserInput, token });
+    private readonly csrfService: CsrfService,
+  ) { }
+  async create(createUserInput: CreateUserInput) {
+    return this.userModel.create({ ...createUserInput });
   }
 
   findAll() {
@@ -49,34 +52,30 @@ export class UsersService {
 
   async update(id: string, updateUserInput: Partial<UpdateUserInput>) {
     const user = await this.findById(id);
-    if (!user) {
-      throw new NotFoundException('User not found!');
-    }
+
     return this.userModel.findByIdAndUpdate(id, { ...updateUserInput });
   }
 
   async remove(id: string) {
     const user = await this.findById(id);
-    if (!user) {
-      throw new NotFoundException('User not found!');
-    }
+
     return this.userModel.findByIdAndDelete(id);
   }
 
-  async addToCart(productId: string, user: User) {
+  async addToCart(productId: string, user: User, token: string) {
+
+    await this.csrfService.verifyToken(token, user._id);
     const product = await this.productService.findById(productId);
-    if (!product) {
-      throw new NotFoundException('Product not found!');
-    }
     user.addToCart(product._id);
     return product;
   }
 
+  async getCartItems(user: UserDocument) {
+    return (await this.findById(user._id)).populate("cart.items.productId");
+  }
   async removeItemFromCart(productId: string, quantity: number, user: User) {
     const product = await this.productService.findById(productId);
-    if (!product) {
-      throw new NotFoundException('Product not found!');
-    }
+
     user.removeItemFromCart(product._id, quantity);
     return product;
   }

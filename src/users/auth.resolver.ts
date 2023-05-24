@@ -12,7 +12,7 @@ import { LoginVerifyToken } from './dto/login-verify-token.input';
 
 @Resolver(() => User)
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Mutation(() => User)
   register(@Args('createUserInput') createUserInput: CreateUserInput) {
@@ -21,6 +21,7 @@ export class AuthResolver {
 
   @Query(() => LoginUnionResult)
   login(@Args('loginUserInput') loginUserInput: LoginUserInput) {
+    console.log("ASD")
     return this.authService.signin(loginUserInput);
   }
 
@@ -42,7 +43,7 @@ export class AuthResolver {
     return this.authService.resetPassword(userId, password, token);
   }
 
-  @Query(() => User)
+  @Query(() => User, { name: 'CheckJwtToken' })
   checkToken(@Args('token', { type: () => String }) token: string) {
     return this.authService.validate(token);
   }

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -11,9 +12,8 @@ import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
-import { User, UserDocument } from './entities/user.entity';
-import { Document } from 'mongoose';
 import { LoginVerifyToken } from './dto/login-verify-token.input';
+import { GraphQLError } from 'graphql';
 
 const scrypt = promisify(_scrypt);
 
@@ -23,22 +23,18 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly nodemailer: MailerService,
-  ) {}
+  ) { }
 
   async validate(token: string) {
-    if (token.length > 0) {
-      return this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET,
-      });
-    } else {
-      return {
-        _id: '0',
-        email: 'wrong@wrong.com',
-        password: 'wrong',
-        username: 'wron',
-        cart: { items: [] },
-      } as Partial<User>;
-    }
+    if (token && token.length > 0)
+      return this.jwtService
+        .verifyAsync(token, {
+          secret: process.env.JWT_SECRET,
+        })
+        .catch((error: GraphQLError) => {
+          throw new BadRequestException(error.message);
+        });
+    else throw new BadRequestException('Wrong Token');
   }
 
   async signup({ email, password, username }: CreateUserInput) {
@@ -69,8 +65,8 @@ export class AuthService {
         email,
         password: hashedPassword,
         username,
+        token: token.toString(),
       },
-      token.toString(),
     );
   }
 
@@ -79,10 +75,11 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException("User doesn't exist, please create one!");
     }
+    console.log(user.token)
     if (user.token) {
       return {
         message:
-          'You Have To Enter the token here first to activate your account!',
+          'You Have To Enter the token here first to activate your account! Okay?',
       };
     }
     const doMatch = await bcrypt.compare(password, user.password);

@@ -26,4 +26,6 @@ export class CreateUserInput {
   @IsString()
   @MinLength(5)
   username: string;
+
+  token?: string
 }

@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { CsrfService } from './csrf.service';
 import { CsrfResolver } from './csrf.resolver';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CsrfSchema } from './entities/csrf.entity';
-
+@Global()
 @Module({
   providers: [CsrfResolver, CsrfService],
   imports: [MongooseModule.forFeature([{ name: 'Csrf', schema: CsrfSchema }])],

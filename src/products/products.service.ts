@@ -15,22 +15,24 @@ import { Product } from './entities/product.entity';
 import { CsrfService } from 'src/csrf/csrf.service';
 import { RemoveProductInput } from './dto/remove-product.input';
 import { ProductFindOptions } from './dto/product-find-options.input';
-import { GraphQLError } from 'graphql';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
     private readonly csrfService: CsrfService,
-  ) {}
-  async create(createProductInput: CreateProductInput, { _id }: User) {
-    await this.csrfService.verifyToken(createProductInput.token, _id);
-    return this.productModel.create({ ...createProductInput, userId: _id });
+  ) { }
+  async create(createProductInput: CreateProductInput, user: User) {
+    await this.csrfService.verifyToken(createProductInput.token, user._id);
+
+    return this.productModel.create({
+      ...createProductInput,
+      userId: user._id,
+    });
   }
 
   find(productFindOptions: ProductFindOptions) {
     const filters: FilterQuery<Product> = {};
-
     if (productFindOptions.words) {
       filters.$text = {
         $search: productFindOptions.words,
@@ -44,12 +46,6 @@ export class ProductsService {
   }
 
   async findRecommendedProducts(productFindOptions: ProductFindOptions) {
-    const product = await this.productModel.findById(
-      productFindOptions.productId,
-    );
-    if (!product) {
-      throw new NotFoundException('Product Not Found!');
-    }
     return this.productModel
       .find({
         _id: { $ne: productFindOptions.productId },
@@ -75,24 +71,15 @@ export class ProductsService {
   }
 
   async findById(id: string) {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new GraphQLError('Product ID is wrong...');
+    if (mongoose.isValidObjectId(id)) {
+      const result = await this.productModel.findById(id);
+      return result;
     }
-    const result = await this.productModel.findById(id);
-    console.log(result.errors);
-    if (result.errors) {
-      throw new BadRequestException('No Product Found!');
-    }
-    return result;
   }
 
   async update(updateProductInput: UpdateProductInput, user: User) {
     await this.csrfService.verifyToken(updateProductInput.token, user._id);
     const product = await this.findById(updateProductInput._id);
-    if (!product) {
-      throw new BadRequestException('Product not found!');
-    }
-
     if (product.userId !== user._id)
       throw new BadRequestException('Not your products fools');
     return this.productModel.findByIdAndUpdate(
@@ -101,11 +88,21 @@ export class ProductsService {
     );
   }
 
+  async getCartItems(userId: string) {
+    const products = await this.productModel.aggregate(
+      [
+        { $project: { _id: 1 } }
+      ]
+    )
+    console.log(products)
+    return products
+  }
+
   async remove(removeProductInput: RemoveProductInput, user: User) {
     await this.csrfService.verifyToken(removeProductInput.token, user._id);
 
     const product = await this.findById(removeProductInput.productId);
-    if (!product) {
+    if ('message' in product) {
       throw new BadRequestException('Product not found!');
     }
     if (product.userId !== user._id)

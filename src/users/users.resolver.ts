@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UsersService } from './users.service';
-import { User } from './entities/user.entity';
+import { User, UserDocument } from './entities/user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { AuthService } from './auth.service';
@@ -13,18 +13,18 @@ import { userDecorator } from './decorators/user.decorator';
 import { Product } from 'src/products/entities/product.entity';
 import { RemoveItemFromCartInput } from './dto/removeItemFromCart-user.input';
 import { ResetPasswordInput } from './dto/reset-user-password.input';
+import { AddToCartInput } from './dto/add-to-cart.input';
+import { GetCartItems } from './dto/get-cart-items.input';
 
 type Token = {
   access_token: string;
 };
 @Resolver(() => User)
-@UseInterceptors(AuthInterceptor)
-@UseGuards(AuthGuard)
 export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
-  ) {}
+  ) { }
 
   @Query(() => [User], { name: 'users' })
   findAll(@userDecorator() user: User) {
@@ -53,11 +53,33 @@ export class UsersResolver {
   }
 
   @Mutation(() => Product)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(AuthGuard)
   addToCart(
-    @Args('id', { type: () => String }) productId: string,
+    @Args('addToCartInput') addToCartInput: AddToCartInput,
     @userDecorator() user: User,
   ) {
-    return this.usersService.addToCart(productId, user);
+    return this.usersService.addToCart(
+      addToCartInput.productId,
+      user,
+      addToCartInput.token,
+    );
+  }
+
+  @Query(() => [Product])
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(AuthGuard)
+  async getCartItems(@userDecorator() user: UserDocument) {
+    const fetchedUser = await this.usersService.getCartItems(user);
+    const cart = fetchedUser.cart.items;
+
+    const cartItems = cart.map(item => {
+      //@ts-ignore
+      console.log(item.productId.title)
+      //@ts-ignore
+      return { title: item.productId.title, description: item.productId.description, price: item.productId.price, imageUrl: item.productId.imageUrl, userId: item.productId.userId, quantity: item.quantity }
+    })
+    return cartItems
   }
 
   @Mutation(() => Product)

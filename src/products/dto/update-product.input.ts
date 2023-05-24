@@ -15,4 +15,9 @@ export class UpdateProductInput extends PartialType(CreateProductInput) {
   imageUrl: string;
   @Field({ description: 'CsrfToken' })
   token: string;
+  @Field(() => Int, { description: 'Stock', nullable: true })
+  stock: number;
+  @Field(() => Int, { description: 'discount', nullable: true })
+  discount: number;
+
 }

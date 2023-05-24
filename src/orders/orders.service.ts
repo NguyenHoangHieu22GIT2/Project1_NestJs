@@ -9,21 +9,22 @@ import { Order } from './entities/order.entity';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly productService: ProductsService,
-    @InjectModel(Order.name) private readonly orderModel: Model<Order>) { }
+  constructor(
+    private readonly productService: ProductsService,
+    @InjectModel(Order.name) private readonly orderModel: Model<Order>,
+  ) {}
   async create(user: User) {
     if (user.cart.items.length <= 0) {
-      throw new BadRequestException("No Cart Item to order")
+      throw new BadRequestException('No Cart Item to order');
     }
-    const promises = (user.cart.items.map(async (item) => {
-      const product = await this.productService.findById(item.productId)
+    const promises = user.cart.items.map(async (item) => {
+      const product = await this.productService.findById(item.productId);
       product.quantity = item.quantity;
       return product;
-    }))
+    });
     const products = await Promise.all(promises);
-    user.clearCart()
-    return this.orderModel.create({ products, userId: user._id })
-
+    user.clearCart();
+    return this.orderModel.create({ products, userId: user._id });
   }
 
   findAll() {
@@ -33,5 +34,4 @@ export class OrdersService {
   findOne(id: number) {
     return `This action returns a #${id} order`;
   }
-
 }

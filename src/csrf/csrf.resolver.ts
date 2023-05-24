@@ -7,14 +7,16 @@ import { CheckTokenInput } from './dto/check-token.input';
 
 @Resolver(() => Csrf)
 export class CsrfResolver {
-  constructor(private readonly csrfService: CsrfService) {}
+  constructor(private readonly csrfService: CsrfService) { }
 
   @Mutation(() => Csrf)
-  createCsrfToken(@Args('userId', { type: () => String }) userId: string) {
-    return this.csrfService.createToken(userId);
+  async createCsrfToken(@Args('userId', { type: () => String }) userId: string) {
+    const token = await this.csrfService.createToken(userId);
+    console.log(token)
+    return token;
   }
 
-  @Query(() => Csrf)
+  @Query(() => Csrf, { name: 'CheckCsrfToken' })
   checkToken(
     @Args('checkTokenInput', { type: () => CheckTokenInput })
     checkTokenInput: CheckTokenInput,

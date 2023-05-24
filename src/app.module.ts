@@ -10,7 +10,7 @@ import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { CsrfModule } from './csrf/csrf.module';
 import { ConfigModule } from '@nestjs/config';
-
+import { FavoriteProductsModule } from './favorite-products/favorite-products.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,6 +29,7 @@ import { ConfigModule } from '@nestjs/config';
     ProductsModule,
     OrdersModule,
     CsrfModule,
+    FavoriteProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

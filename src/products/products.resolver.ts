@@ -10,10 +10,11 @@ import { User } from 'src/users/entities/user.entity';
 import { AuthGuard } from 'src/users/auth.guard';
 import { RemoveProductInput } from './dto/remove-product.input';
 import { ProductFindOptions } from './dto/product-find-options.input';
+// import { ProductUnionType } from './union/product.union';
 
 @Resolver(() => Product)
 export class ProductsResolver {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
   @Mutation(() => Product)
   @UseInterceptors(AuthInterceptor)
@@ -30,7 +31,6 @@ export class ProductsResolver {
     @Args('productFindOptions') productFindOptions: ProductFindOptions,
   ) {
     const product = await this.productsService.find(productFindOptions);
-    console.log(product);
     return product;
   }
 
@@ -77,4 +77,12 @@ export class ProductsResolver {
   ) {
     return this.productsService.remove(removeProductInput, user);
   }
+
+  @Query(() => Product)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(AuthGuard)
+  test(@userDecorator() user: User) {
+    return this.productsService.getCartItems(user._id);
+  }
+
 }
