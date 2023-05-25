@@ -23,7 +23,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly nodemailer: MailerService,
-  ) { }
+  ) {}
 
   async validate(token: string) {
     if (token && token.length > 0)
@@ -60,14 +60,12 @@ export class AuthService {
       <code>${token}</code>
       `,
     });
-    return this.usersService.create(
-      {
-        email,
-        password: hashedPassword,
-        username,
-        token: token.toString(),
-      },
-    );
+    return this.usersService.create({
+      email,
+      password: hashedPassword,
+      username,
+      token: token.toString(),
+    });
   }
 
   async signin({ email, password }: LoginUserInput) {
@@ -75,7 +73,7 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException("User doesn't exist, please create one!");
     }
-    console.log(user.token)
+    console.log(user.token);
     if (user.token) {
       return {
         message:

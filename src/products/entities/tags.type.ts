@@ -1,9 +1,16 @@
-// import { Field, InputType, ObjectType } from "@nestjs/graphql";
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 
-// @InputType()
-// export class TagType {
-//     @Field({ description: "name" })
-//     name: string
-//     @Field(() => [String], { description: "Options" })
-//     options: string[]
-// }
+@ObjectType()
+export class TagType {
+  @Field({ description: 'name' })
+  name: string;
+  @Field(() => [String], { description: 'Options' })
+  options: string[];
+}
+@InputType()
+export class TagInput {
+  @Field({ description: 'name' })
+  name: string;
+  @Field(() => [String], { description: 'Options' })
+  options: string[];
+}

@@ -10,11 +10,12 @@ import { User } from 'src/users/entities/user.entity';
 import { AuthGuard } from 'src/users/auth.guard';
 import { RemoveProductInput } from './dto/remove-product.input';
 import { ProductFindOptions } from './dto/product-find-options.input';
+import { RatingInput } from './entities/rating.type';
 // import { ProductUnionType } from './union/product.union';
 
 @Resolver(() => Product)
 export class ProductsResolver {
-  constructor(private readonly productsService: ProductsService) { }
+  constructor(private readonly productsService: ProductsService) {}
 
   @Mutation(() => Product)
   @UseInterceptors(AuthInterceptor)
@@ -24,6 +25,16 @@ export class ProductsResolver {
     @userDecorator() user: User,
   ) {
     return this.productsService.create(createProductInput, user);
+  }
+
+  @Mutation(() => Product)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(AuthGuard)
+  rating(
+    @Args('ratingInput') ratingInput: RatingInput,
+    @userDecorator() user: User,
+  ) {
+    return this.productsService.addRating(ratingInput, user);
   }
 
   @Query(() => [Product], { name: 'products' })
@@ -84,5 +95,4 @@ export class ProductsResolver {
   test(@userDecorator() user: User) {
     return this.productsService.getCartItems(user._id);
   }
-
 }

@@ -10,12 +10,6 @@ input AddToCartInput {
   token: String!
 }
 
-type tagType {
-  name:String!
-
-  options:[String]!
-}
-
 input CheckTokenInput {
   """The Token To Check"""
   token: String!
@@ -29,7 +23,9 @@ input CreateProductInput {
   description: String!
 
   """discount"""
-  discount: Int!
+  discount: Int
+
+  """The Image Url"""
   imageUrl: String!
 
   """price of the product"""
@@ -38,13 +34,14 @@ input CreateProductInput {
   """Stock"""
   stock: Int!
 
+  """Tag Options"""
+  tags: [TagInput!]
+
   """Title of the product"""
   title: String!
 
   """CsrfToken"""
   token: String!
-
-  tags:[tagType]!
 }
 
 input CreateUserInput {
@@ -121,6 +118,7 @@ type Mutation {
   createCsrfToken(userId: String!): Csrf!
   createOrder: Order!
   createProduct(createProductInput: CreateProductInput!): Product!
+  rating(ratingInput: RatingInput!): Product!
   register(createUserInput: CreateUserInput!): User!
   removeItemFromCart(removeItemFromCartInput: RemoveItemFromCartInput!): Product!
   removeProduct(removeProductInput: RemoveProductInput!): Product!
@@ -158,7 +156,7 @@ type Product {
   quantity: Int
 
   """Stock of the products"""
-  ratings: Int
+  ratings: [Rating!]
 
   """Stock of the products"""
   stock: Int!
@@ -206,6 +204,31 @@ type Query {
   verifyToken(loginVerifyToken: LoginVerifyToken!): User!
 }
 
+type Rating {
+  """comment"""
+  comment: String!
+
+  """Date"""
+  createdAt: DateTime!
+
+  """stars"""
+  stars: Int!
+
+  """userId"""
+  userId: String!
+}
+
+input RatingInput {
+  """comment"""
+  comment: String!
+
+  """ProductId"""
+  productId: String!
+
+  """stars"""
+  stars: Int!
+}
+
 input RemoveItemFromCartInput {
   """Product ID"""
   productId: String!
@@ -229,6 +252,14 @@ input ResetPasswordInput {
 
   """userId"""
   userId: String!
+}
+
+input TagInput {
+  """name"""
+  name: String!
+
+  """Options"""
+  options: [String!]!
 }
 
 input ToggleFavoriteProductInput {
@@ -257,6 +288,9 @@ input UpdateProductInput {
 
   """Stock"""
   stock: Int
+
+  """Tag Options"""
+  tags: [TagInput!]
 
   """Title of the product"""
   title: String

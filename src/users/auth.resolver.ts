@@ -7,12 +7,12 @@ import { LoginUserInput } from './dto/login-user.input';
 import { jwtToken as token } from './entities/token.entity';
 import { ResetPasswordInput } from './dto/reset-user-password.input';
 import { userDecorator } from './decorators/user.decorator';
-import { LoginUnionResult } from './union/login.union';
 import { LoginVerifyToken } from './dto/login-verify-token.input';
+import { LoginUnionResult } from './union/login.union';
 
 @Resolver(() => User)
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Mutation(() => User)
   register(@Args('createUserInput') createUserInput: CreateUserInput) {
@@ -21,7 +21,7 @@ export class AuthResolver {
 
   @Query(() => LoginUnionResult)
   login(@Args('loginUserInput') loginUserInput: LoginUserInput) {
-    console.log("ASD")
+    console.log('ASD');
     return this.authService.signin(loginUserInput);
   }
 

@@ -15,20 +15,36 @@ import { Product } from './entities/product.entity';
 import { CsrfService } from 'src/csrf/csrf.service';
 import { RemoveProductInput } from './dto/remove-product.input';
 import { ProductFindOptions } from './dto/product-find-options.input';
+import { Rating, RatingInput } from './entities/rating.type';
+// import { GraphQLUpload, FileUpload } from 'graphql-upload/GraphQLUpload.mjs';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
     private readonly csrfService: CsrfService,
-  ) { }
+  ) {}
   async create(createProductInput: CreateProductInput, user: User) {
     await this.csrfService.verifyToken(createProductInput.token, user._id);
-
     return this.productModel.create({
       ...createProductInput,
       userId: user._id,
     });
+  }
+
+  async addRating({ comment, productId, stars }: RatingInput, user: User) {
+    const date = new Date();
+    const product = await this.findById(productId);
+    if (!product) {
+      throw new BadRequestException('No Product Found!');
+    }
+    product.ratings.push({
+      comment,
+      userId: user._id,
+      stars,
+      createdAt: date,
+    });
+    return product.save();
   }
 
   find(productFindOptions: ProductFindOptions) {
@@ -89,13 +105,11 @@ export class ProductsService {
   }
 
   async getCartItems(userId: string) {
-    const products = await this.productModel.aggregate(
-      [
-        { $project: { _id: 1 } }
-      ]
-    )
-    console.log(products)
-    return products
+    const products = await this.productModel.aggregate([
+      { $project: { _id: 1 } },
+    ]);
+    console.log(products);
+    return products;
   }
 
   async remove(removeProductInput: RemoveProductInput, user: User) {

@@ -1,6 +1,8 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Schema as SchemaType } from 'mongoose';
+import { TagType } from './tags.type';
+import { Rating } from './rating.type';
 
 @ObjectType()
 @Schema()
@@ -25,48 +27,80 @@ export class Product {
   imageUrl: string;
 
   @Field({ description: 'user Id' })
-  @Prop({ type: SchemaType.Types.ObjectId, required: true, ref: "User" })
+  @Prop({ type: SchemaType.Types.ObjectId, required: true, ref: 'User' })
   userId: string;
 
   @Field(() => Int, { description: 'Quantity of the product', nullable: true })
   @Prop({ required: false, type: Number })
   quantity: number;
 
-  @Field(() => Int, { description: "Stock of the products", nullable: true })
-  @Prop({ required: true, type: Number, default: 0 })
-  ratings: number
+  @Field(() => [Rating], {
+    description: 'Stock of the products',
+    nullable: true,
+  })
+  @Prop({
+    required: true,
+    type: [
+      {
+        userId: {
+          type: SchemaType.Types.ObjectId,
+          required: true,
+          ref: 'User',
+          _id: false,
+        },
+        comment: {
+          type: String,
+          required: true,
+          _id: false,
+        },
+        stars: {
+          type: Number,
+          required: true,
+          _id: false,
+        },
+        createdAt: {
+          type: Date,
+          required: true,
+          _id: false,
+        },
+        _id: false,
+      },
+    ],
+    default: [],
+  })
+  ratings: Rating[];
 
-  @Field(() => Int, { description: "Stock of the products" })
+  @Field(() => Int, { description: 'Stock of the products' })
   @Prop({ required: true, type: Number, default: 0 })
-  stock: number
+  stock: number;
 
-  @Field(() => Int, { description: "discount of the product" })
+  @Field(() => Int, { description: 'discount of the product' })
   @Prop({ required: true, type: Number, default: 0 })
-  discount: number
+  discount: number;
 
-  @Field(() => Int, { description: "has Sold of the product" })
+  @Field(() => Int, { description: 'has Sold of the product' })
   @Prop({ required: true, type: Number, default: 0 })
-  hasSold: number
-  // @Field(() => String)
+  hasSold: number;
+  // @Field(() => [TagType])
   // @Prop({
   //   type: [
   //     {
   //       name: {
   //         type: String,
   //         required: true,
-  //         _id: false
+  //         _id: false,
   //       },
   //       options: {
   //         type: [String],
   //         required: true,
-  //         _id: false
-  //       }
-  //     }
+  //         _id: false,
+  //       },
+  //     },
   //   ],
   //   required: false,
-  //   default: []
+  //   default: [],
   // })
-  // options: []
+  // options: [];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

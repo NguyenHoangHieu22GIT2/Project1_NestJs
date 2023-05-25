@@ -1,6 +1,6 @@
-import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 
-@InputType()
+@ObjectType()
 export class ErrorHandler {
   @Field({ description: 'A message for the error' })
   message: string;
