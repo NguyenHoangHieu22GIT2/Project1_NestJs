@@ -11,7 +11,6 @@ import { AuthGuard } from 'src/users/auth.guard';
 import { RemoveProductInput } from './dto/remove-product.input';
 import { ProductFindOptions } from './dto/product-find-options.input';
 import { RatingInput } from './entities/rating.type';
-// import { ProductUnionType } from './union/product.union';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -20,11 +19,12 @@ export class ProductsResolver {
   @Mutation(() => Product)
   @UseInterceptors(AuthInterceptor)
   @UseGuards(AuthGuard)
-  createProduct(
+  async createProduct(
     @Args('createProductInput') createProductInput: CreateProductInput,
     @userDecorator() user: User,
   ) {
-    return this.productsService.create(createProductInput, user);
+    const result = await this.productsService.create(createProductInput, user);
+    return result;
   }
 
   @Mutation(() => Product)

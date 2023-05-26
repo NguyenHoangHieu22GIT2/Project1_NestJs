@@ -16,7 +16,9 @@ import { CsrfService } from 'src/csrf/csrf.service';
 import { RemoveProductInput } from './dto/remove-product.input';
 import { ProductFindOptions } from './dto/product-find-options.input';
 import { Rating, RatingInput } from './entities/rating.type';
-// import { GraphQLUpload, FileUpload } from 'graphql-upload/GraphQLUpload.mjs';
+import { createWriteStream, unlink } from 'fs';
+import { join } from 'path';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class ProductsService {
@@ -26,10 +28,29 @@ export class ProductsService {
   ) {}
   async create(createProductInput: CreateProductInput, user: User) {
     await this.csrfService.verifyToken(createProductInput.token, user._id);
-    return this.productModel.create({
+    const product = this.productModel.create({
       ...createProductInput,
+      imageUrl: createProductInput.image,
       userId: user._id,
     });
+    return product;
+    // const { createReadStream, filename} = await createProductInput.image;
+    // if(!(filename.endsWith("jpg") ||filename.endsWith("png")||filename.endsWith("jpeg"))){
+    //   throw new BadRequestException("Image only")
+    // }
+    // const salt = randomBytes(16).toString("hex")
+    // const uniqueUrlName = "a" + salt + "-" + filename;
+    // return new Promise(resolve =>{
+    //   createReadStream().pipe(createWriteStream(join(process.cwd(), `./src/upload/${uniqueUrlName}`))).on("finish",()=>{
+    //     console.log("Hello Create Product")
+    //        const product = this.productModel.create({
+    //         ...createProductInput,
+    //         imageUrl:uniqueUrlName,
+    //         userId: user._id,
+    //        })
+    //        resolve(product)
+    //   })
+    // })
   }
 
   async addRating({ comment, productId, stars }: RatingInput, user: User) {
@@ -116,11 +137,18 @@ export class ProductsService {
     await this.csrfService.verifyToken(removeProductInput.token, user._id);
 
     const product = await this.findById(removeProductInput.productId);
-    if ('message' in product) {
-      throw new BadRequestException('Product not found!');
+    if (!product) {
+      throw new BadRequestException('No product Found!');
     }
     if (product.userId !== user._id)
       throw new BadRequestException('Not your products fools');
-    return this.productModel.findByIdAndDelete(removeProductInput.productId);
+    return unlink(
+      join(process.cwd(), `./src/upload/${product.imageUrl}`),
+      () => {
+        return this.productModel.findByIdAndDelete(
+          removeProductInput.productId,
+        );
+      },
+    );
   }
 }

@@ -24,9 +24,7 @@ input CreateProductInput {
 
   """discount"""
   discount: Int
-
-  """The Image Url"""
-  imageUrl: String!
+  image: String
 
   """price of the product"""
   price: Int!
@@ -145,8 +143,6 @@ type Product {
 
   """has Sold of the product"""
   hasSold: Int!
-
-  """image of the product"""
   imageUrl: String!
 
   """price of the product"""
@@ -279,6 +275,7 @@ input UpdateProductInput {
 
   """discount"""
   discount: Int
+  image: String
 
   """image Url of the product"""
   imageUrl: String

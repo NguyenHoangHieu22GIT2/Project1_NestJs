@@ -11,6 +11,7 @@ import { OrdersModule } from './orders/orders.module';
 import { CsrfModule } from './csrf/csrf.module';
 import { ConfigModule } from '@nestjs/config';
 import { FavoriteProductsModule } from './favorite-products/favorite-products.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({

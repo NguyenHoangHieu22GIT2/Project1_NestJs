@@ -3,7 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Schema as SchemaType } from 'mongoose';
 import { TagType } from './tags.type';
 import { Rating } from './rating.type';
-
+import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 @ObjectType()
 @Schema()
 export class Product {
@@ -22,7 +22,8 @@ export class Product {
   @Prop({ type: String, required: true })
   description: string;
 
-  @Field({ description: 'image of the product' })
+
+  @Field(() => String)
   @Prop({ type: String, required: true })
   imageUrl: string;
 
