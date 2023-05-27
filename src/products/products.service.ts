@@ -30,7 +30,7 @@ export class ProductsService {
     await this.csrfService.verifyToken(createProductInput.token, user._id);
     const product = this.productModel.create({
       ...createProductInput,
-      imageUrl: createProductInput.image,
+      images: createProductInput.images,
       userId: user._id,
     });
     return product;
@@ -142,13 +142,12 @@ export class ProductsService {
     }
     if (product.userId !== user._id)
       throw new BadRequestException('Not your products fools');
-    return unlink(
-      join(process.cwd(), `./src/upload/${product.imageUrl}`),
-      () => {
+    return product.images.forEach((image) => {
+      return unlink(join(process.cwd(), `./src/upload/${image}`), () => {
         return this.productModel.findByIdAndDelete(
           removeProductInput.productId,
         );
-      },
-    );
+      });
+    });
   }
 }

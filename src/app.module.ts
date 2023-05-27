@@ -11,6 +11,7 @@ import { OrdersModule } from './orders/orders.module';
 import { CsrfModule } from './csrf/csrf.module';
 import { ConfigModule } from '@nestjs/config';
 import { FavoriteProductsModule } from './favorite-products/favorite-products.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -25,6 +26,9 @@ import { FavoriteProductsModule } from './favorite-products/favorite-products.mo
     }),
     MongooseModule.forRoot(process.env.DATABASE_URI, {
       dbName: process.env.DATABASE_NAME,
+    }),
+    MulterModule.register({
+      dest: './files',
     }),
     UsersModule,
     ProductsModule,

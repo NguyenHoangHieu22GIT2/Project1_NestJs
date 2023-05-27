@@ -22,10 +22,9 @@ export class Product {
   @Prop({ type: String, required: true })
   description: string;
 
-
-  @Field(() => String)
-  @Prop({ type: String, required: true })
-  imageUrl: string;
+  @Field(() => [String])
+  @Prop({ type: [String], required: true })
+  images: string[];
 
   @Field({ description: 'user Id' })
   @Prop({ type: SchemaType.Types.ObjectId, required: true, ref: 'User' })

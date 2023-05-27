@@ -37,7 +37,7 @@ export class AuthService {
     else throw new BadRequestException('Wrong Token');
   }
 
-  async signup({ email, password, username }: CreateUserInput) {
+  async signup({ email, password, username, avatar }: CreateUserInput) {
     const user = await this.usersService.findOne(email);
     if (user) {
       throw new BadRequestException('User already existed!!!');
@@ -62,6 +62,7 @@ export class AuthService {
     });
     return this.usersService.create({
       email,
+      avatar,
       password: hashedPassword,
       username,
       token: token.toString(),
@@ -90,6 +91,9 @@ export class AuthService {
         secret: process.env.JWT_SECRET,
       }),
       userId: user._id,
+      email: user.email,
+      avatar: user.avatar,
+      username: user.username,
     };
   }
 

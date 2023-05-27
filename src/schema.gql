@@ -24,7 +24,7 @@ input CreateProductInput {
 
   """discount"""
   discount: Int
-  image: String
+  images: [String!]
 
   """price of the product"""
   price: Int!
@@ -43,6 +43,9 @@ input CreateProductInput {
 }
 
 input CreateUserInput {
+  """avatar"""
+  avatar: String
+
   """email"""
   email: String!
 
@@ -143,7 +146,7 @@ type Product {
 
   """has Sold of the product"""
   hasSold: Int!
-  imageUrl: String!
+  images: [String!]!
 
   """price of the product"""
   price: Int!
@@ -166,13 +169,13 @@ type Product {
 
 input ProductFindOptions {
   """Limit the number of received Products..."""
-  limit: Int!
+  limit: Int
 
   """ProductId so That we can find related Product"""
   productId: String
 
   """skip the number of the Products..."""
-  skip: Int!
+  skip: Int
 
   """Filter Words"""
   words: String
@@ -275,10 +278,10 @@ input UpdateProductInput {
 
   """discount"""
   discount: Int
-  image: String
 
   """image Url of the product"""
   imageUrl: String
+  images: [String!]
 
   """price of the product"""
   price: Int
@@ -300,6 +303,9 @@ input UpdateUserInput {
   """ID"""
   _id: String!
 
+  """avatar"""
+  avatar: String
+
   """email"""
   email: String
 
@@ -313,6 +319,9 @@ input UpdateUserInput {
 type User {
   """Id of The user"""
   _id: String!
+
+  """avatar of the user"""
+  avatar: String!
 
   """email of the user"""
   email: String!
@@ -328,6 +337,15 @@ type jwtToken {
   """Access Token for user loggedin"""
   access_token: String!
 
+  """avatar"""
+  avatar: String!
+
+  """email"""
+  email: String!
+
   """User ID"""
   userId: String!
+
+  """Username"""
+  username: String!
 }

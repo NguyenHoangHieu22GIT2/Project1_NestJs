@@ -16,21 +16,24 @@ export class User {
   _id: string;
 
   @Field({ description: 'email of the user' })
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   email: string;
 
+  @Field({ description: 'avatar of the user' })
+  @Prop({ required: true, type: String })
+  avatar: string;
   @Field({ description: 'password of the user' })
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   password: string;
 
   @Field({ description: 'username of the user' })
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   username: string;
 
-  @Prop({ required: false })
+  @Prop({ required: false, type: String })
   token: string;
 
-  @Prop({ required: false })
+  @Prop({ required: false, type: Date })
   tokenDate: Date;
 
   @Prop({
