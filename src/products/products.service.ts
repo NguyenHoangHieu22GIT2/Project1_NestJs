@@ -7,7 +7,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { FilterQuery, Model } from 'mongoose';
+import mongoose, { FilterQuery, Model, ObjectId } from 'mongoose';
 import { User } from 'src/users/entities/user.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
@@ -15,10 +15,12 @@ import { Product } from './entities/product.entity';
 import { CsrfService } from 'src/csrf/csrf.service';
 import { RemoveProductInput } from './dto/remove-product.input';
 import { ProductFindOptions } from './dto/product-find-options.input';
-import { Rating, RatingInput } from './entities/rating.type';
 import { createWriteStream, unlink } from 'fs';
 import { join } from 'path';
 import { randomBytes } from 'crypto';
+import { CreateRatingInput } from './dto/create-rating.input';
+import { GetRatingInput } from './dto/get-rating.input';
+import { ToggleVoteInput } from './dto/toggle-vote.input';
 
 @Injectable()
 export class ProductsService {
@@ -53,19 +55,118 @@ export class ProductsService {
     // })
   }
 
-  async addRating({ comment, productId, stars }: RatingInput, user: User) {
+  async addRating(
+    { rating, title, productId, stars }: CreateRatingInput,
+    user: User,
+  ) {
     const date = new Date();
     const product = await this.findById(productId);
     if (!product) {
       throw new BadRequestException('No Product Found!');
     }
     product.ratings.push({
-      comment,
+      rating,
       userId: user._id,
       stars,
       createdAt: date,
+      title,
+      upvote: [],
+      downvote: [],
     });
-    return product.save();
+    await product.save();
+    const populatedProduct = await product.populate({
+      path: 'ratings.userId',
+      select: 'username avatar',
+    });
+    console.log('Hello Worldd');
+    return populatedProduct;
+  }
+
+  async getRatings({ limit, productId, skip }: GetRatingInput) {
+    if (limit <= 0) {
+      limit = 1;
+    }
+    const product = await this.productModel.findById(productId, {
+      ratings: { $slice: [skip, limit] },
+    });
+    const populatedProduct = await product.populate({
+      path: 'ratings.userId',
+      select: 'username avatar ',
+    });
+    // console.log(populatedProduct.ratings);
+    return populatedProduct;
+  }
+  async toggleUpvoteRating(
+    { productId, ratingId }: ToggleVoteInput,
+    user: User,
+  ) {
+    const product = await this.findById(productId);
+    let populatedProduct = await product.populate({
+      path: 'ratings.userId',
+      select: 'username avatar ',
+    });
+    const ratingIndex = populatedProduct.ratings.findIndex(
+      (rating) => rating._id.toString() === ratingId.toString(),
+    );
+    const rating = populatedProduct.ratings.find(
+      (rating) => rating._id.toString() === ratingId.toString(),
+    );
+    const userAlreadyUpvote = rating.upvote.findIndex(
+      (userId) => userId.toString() === user._id.toString(),
+    );
+    const userAlreadyDownvote = rating.downvote.findIndex(
+      (userId) => userId.toString() === user._id.toString(),
+    );
+    if (userAlreadyDownvote >= 0) {
+      populatedProduct.ratings[ratingIndex].downvote = populatedProduct.ratings[
+        ratingIndex
+      ].downvote.filter((userId) => userId.toString() !== user._id.toString());
+    }
+    if (userAlreadyUpvote < 0) {
+      populatedProduct.ratings[ratingIndex].upvote.push(user._id.toString());
+    } else {
+      populatedProduct.ratings[ratingIndex].upvote = populatedProduct.ratings[
+        ratingIndex
+      ].upvote.filter((userId) => userId.toString() !== user._id.toString());
+    }
+    return populatedProduct.save();
+  }
+
+  async toggleDownvoteRating(
+    { productId, ratingId }: ToggleVoteInput,
+    user: User,
+  ) {
+    const product = await this.findById(productId);
+    let populatedProduct = await product.populate({
+      path: 'ratings.userId',
+      select: 'username avatar ',
+    });
+    const ratingIndex = populatedProduct.ratings.findIndex(
+      (rating) => rating._id.toString() === ratingId.toString(),
+    );
+    const rating = populatedProduct.ratings.find(
+      (rating) => rating._id.toString() === ratingId.toString(),
+    );
+    const userAlreadyDownVote = rating.downvote.findIndex(
+      (userId) => userId.toString() === user._id.toString(),
+    );
+    const userAlreadyUpVote = rating.upvote.findIndex(
+      (userId) => userId.toString() === user._id.toString(),
+    );
+
+    if (userAlreadyUpVote >= 0) {
+      populatedProduct.ratings[ratingIndex].upvote = populatedProduct.ratings[
+        ratingIndex
+      ].upvote.filter((userId) => userId.toString() !== user._id.toString());
+    }
+    if (userAlreadyDownVote < 0) {
+      populatedProduct.ratings[ratingIndex].downvote.push(user._id.toString());
+    } else {
+      populatedProduct.ratings[ratingIndex].downvote = populatedProduct.ratings[
+        ratingIndex
+      ].downvote.filter((userId) => userId.toString() !== user._id.toString());
+    }
+    return populatedProduct.save();
   }
 
   find(productFindOptions: ProductFindOptions) {

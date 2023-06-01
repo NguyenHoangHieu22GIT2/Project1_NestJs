@@ -26,7 +26,7 @@ export class UsersService {
     @Inject(forwardRef(() => ProductsService))
     private readonly productService: ProductsService,
     private readonly csrfService: CsrfService,
-  ) { }
+  ) {}
   async create(createUserInput: CreateUserInput) {
     return this.userModel.create({ ...createUserInput });
   }
@@ -51,19 +51,14 @@ export class UsersService {
   }
 
   async update(id: string, updateUserInput: Partial<UpdateUserInput>) {
-    const user = await this.findById(id);
-
     return this.userModel.findByIdAndUpdate(id, { ...updateUserInput });
   }
 
   async remove(id: string) {
-    const user = await this.findById(id);
-
     return this.userModel.findByIdAndDelete(id);
   }
 
   async addToCart(productId: string, user: User, token: string) {
-
     await this.csrfService.verifyToken(token, user._id);
     const product = await this.productService.findById(productId);
     user.addToCart(product._id);
@@ -71,7 +66,7 @@ export class UsersService {
   }
 
   async getCartItems(user: UserDocument) {
-    return (await this.findById(user._id)).populate("cart.items.productId");
+    return (await this.findById(user._id)).populate('cart.items.productId');
   }
   async removeItemFromCart(productId: string, quantity: number, user: User) {
     const product = await this.productService.findById(productId);

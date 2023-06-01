@@ -1,6 +1,6 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Schema as SchemaType } from 'mongoose';
+import mongoose, { Schema as SchemaType } from 'mongoose';
 import { TagType } from './tags.type';
 import { Rating } from './rating.type';
 import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
@@ -35,7 +35,7 @@ export class Product {
   quantity: number;
 
   @Field(() => [Rating], {
-    description: 'Stock of the products',
+    description: 'Rating of a product',
     nullable: true,
   })
   @Prop({
@@ -48,7 +48,12 @@ export class Product {
           ref: 'User',
           _id: false,
         },
-        comment: {
+        rating: {
+          type: String,
+          required: true,
+          _id: false,
+        },
+        title: {
           type: String,
           required: true,
           _id: false,
@@ -63,7 +68,20 @@ export class Product {
           required: true,
           _id: false,
         },
-        _id: false,
+        upvote: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'User',
+          },
+        ],
+        downvote: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'User',
+          },
+        ],
       },
     ],
     default: [],

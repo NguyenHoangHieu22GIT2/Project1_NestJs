@@ -10,7 +10,11 @@ import { User } from 'src/users/entities/user.entity';
 import { AuthGuard } from 'src/users/auth.guard';
 import { RemoveProductInput } from './dto/remove-product.input';
 import { ProductFindOptions } from './dto/product-find-options.input';
-import { RatingInput } from './entities/rating.type';
+import { CreateRatingInput } from './dto/create-rating.input';
+import { Rating } from './entities/rating.type';
+import { GetRatingInput } from './dto/get-rating.input';
+import { ToggleVoteInput } from './dto/toggle-vote.input';
+import { getLatestCreatedRating, getRating } from 'src/utils/ratingHelper';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -27,16 +31,96 @@ export class ProductsResolver {
     return result;
   }
 
-  @Mutation(() => Product)
+  @Mutation(() => Rating, { name: 'AddRating' })
   @UseInterceptors(AuthInterceptor)
   @UseGuards(AuthGuard)
-  rating(
-    @Args('ratingInput') ratingInput: RatingInput,
+  async rating(
+    @Args('createRatingInput') ratingInput: CreateRatingInput,
     @userDecorator() user: User,
   ) {
-    return this.productsService.addRating(ratingInput, user);
+    const ratings = (
+      await this.productsService.addRating(ratingInput, user)
+    ).toObject().ratings;
+    let rating: Rating[];
+    let date: Date;
+    ratings.forEach((curRating, index) => {
+      if (typeof curRating.userId == 'object') {
+        if (!date && curRating.userId._id.toString() === user._id.toString()) {
+          date = curRating.createdAt;
+        }
+        if (
+          date &&
+          date.getTime() < curRating.createdAt.getTime() &&
+          curRating.userId._id.toString() === user._id.toString()
+        ) {
+          date = curRating.createdAt;
+        }
+      }
+    });
+    rating = ratings.filter((rating) => {
+      if (date.getTime() === rating.createdAt.getTime()) {
+        return rating;
+      }
+    });
+    rating[0].userId = JSON.stringify(rating[0].userId);
+    return rating[0];
   }
 
+  @Query(() => [Rating])
+  async getRatings(
+    @Args('getRatingInput', { type: () => GetRatingInput })
+    getRatingInput: GetRatingInput,
+  ) {
+    const ratings = (
+      await this.productsService.getRatings(getRatingInput)
+    ).toObject().ratings;
+
+    const result = ratings.map((rating, index) => {
+      rating.userId = JSON.stringify(rating.userId);
+      return rating;
+    });
+    result.sort((a, b) => {
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+    return result;
+  }
+
+  @Mutation(() => Rating)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(AuthGuard)
+  async toggleUpvote(
+    @Args('toggleUpvoteInput') toggleUpvoteInput: ToggleVoteInput,
+    @userDecorator() user: User,
+  ) {
+    const ratings = (
+      await this.productsService.toggleUpvoteRating(toggleUpvoteInput, user)
+    ).toObject().ratings;
+    let rating: Rating = ratings.find(
+      (rating) =>
+        rating._id.toString() === toggleUpvoteInput.ratingId.toString(),
+    );
+    rating.userId = JSON.stringify(rating.userId);
+
+    return rating;
+  }
+  @Mutation(() => Rating)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(AuthGuard)
+  async toggleDownvote(
+    @Args('toggleDownvoteInput') toggleDownvoteInput: ToggleVoteInput,
+    @userDecorator() user: User,
+  ) {
+    const ratings = (
+      await this.productsService.toggleDownvoteRating(toggleDownvoteInput, user)
+    ).toObject().ratings;
+    let rating: Rating = ratings.find(
+      (rating) =>
+        rating._id.toString() === toggleDownvoteInput.ratingId.toString(),
+    );
+    console.log(rating);
+    rating.userId = JSON.stringify(rating.userId);
+    return rating;
+  }
   @Query(() => [Product], { name: 'products' })
   async findAll(
     @Args('productFindOptions') productFindOptions: ProductFindOptions,

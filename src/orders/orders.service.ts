@@ -18,9 +18,11 @@ export class OrdersService {
       throw new BadRequestException('No Cart Item to order');
     }
     const promises = user.cart.items.map(async (item) => {
-      const product = await this.productService.findById(item.productId);
-      product.quantity = item.quantity;
-      return product;
+      if (typeof item.productId === 'string') {
+        const product = await this.productService.findById(item.productId);
+        product.quantity = item.quantity;
+        return product;
+      }
     });
     const products = await Promise.all(promises);
     user.clearCart();

@@ -42,6 +42,20 @@ input CreateProductInput {
   token: String!
 }
 
+input CreateRatingInput {
+  """the product to rate"""
+  productId: String!
+
+  """The rating"""
+  rating: String!
+
+  """The star"""
+  stars: Int!
+
+  """The title of the rating"""
+  title: String!
+}
+
 input CreateUserInput {
   """avatar"""
   avatar: String
@@ -99,6 +113,17 @@ input FindFavoriteProduct {
   userId: String!
 }
 
+input GetRatingInput {
+  """Limit the rating"""
+  limit: Int!
+
+  """productId to find"""
+  productId: String!
+
+  """Skip the rating"""
+  skip: Int!
+}
+
 union LoginUnionResult = ErrorHandler | jwtToken
 
 input LoginUserInput {
@@ -115,17 +140,19 @@ input LoginVerifyToken {
 }
 
 type Mutation {
+  AddRating(createRatingInput: CreateRatingInput!): Rating!
   addToCart(addToCartInput: AddToCartInput!): Product!
   createCsrfToken(userId: String!): Csrf!
   createOrder: Order!
   createProduct(createProductInput: CreateProductInput!): Product!
-  rating(ratingInput: RatingInput!): Product!
   register(createUserInput: CreateUserInput!): User!
   removeItemFromCart(removeItemFromCartInput: RemoveItemFromCartInput!): Product!
   removeProduct(removeProductInput: RemoveProductInput!): Product!
   removeUser(id: String!): User!
   resetPassword(resetPasswordInput: ResetPasswordInput!): User!
+  toggleDownvote(toggleDownvoteInput: ToggleVoteInput!): Rating!
   toggleFavoriteProduct(toggleFavoriteProductInput: ToggleFavoriteProductInput!): FavoriteProduct!
+  toggleUpvote(toggleUpvoteInput: ToggleVoteInput!): Rating!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
@@ -154,7 +181,7 @@ type Product {
   """Quantity of the product"""
   quantity: Int
 
-  """Stock of the products"""
+  """Rating of a product"""
   ratings: [Rating!]
 
   """Stock of the products"""
@@ -191,6 +218,7 @@ type Query {
   findRecommendedProducts(productFindOptions: ProductFindOptions!): [Product!]!
   forgetPassword(email: String!): User!
   getCartItems: [Product!]!
+  getRatings(getRatingInput: GetRatingInput!): [Rating!]!
   login(loginUserInput: LoginUserInput!): LoginUnionResult!
   order(id: Int!): Order!
   orders: [Order!]!
@@ -204,28 +232,29 @@ type Query {
 }
 
 type Rating {
-  """comment"""
-  comment: String!
+  """_id"""
+  _id: String
 
   """Date"""
   createdAt: DateTime!
 
+  """downvote of the rating"""
+  downvote: [String!]
+
+  """Rating"""
+  rating: String!
+
   """stars"""
   stars: Int!
+
+  """title"""
+  title: String!
+
+  """upvote of the rating"""
+  upvote: [String!]
 
   """userId"""
   userId: String!
-}
-
-input RatingInput {
-  """comment"""
-  comment: String!
-
-  """ProductId"""
-  productId: String!
-
-  """stars"""
-  stars: Int!
 }
 
 input RemoveItemFromCartInput {
@@ -267,6 +296,14 @@ input ToggleFavoriteProductInput {
 
   """User Id"""
   userId: String!
+}
+
+input ToggleVoteInput {
+  """productId"""
+  productId: String!
+
+  """ratingId"""
+  ratingId: String!
 }
 
 input UpdateProductInput {

@@ -16,17 +16,50 @@ import { randomBytes } from 'crypto';
 import { ProductsService } from './products/products.service';
 import { UploadFileDto } from './uploadFile.dto';
 
+const editFileName = (req, file, callback) => {
+  console.log('1');
+  const name = file.originalname.split('.')[0];
+  const fileExtName = extname(file.originalname);
+  const randomName = Array(4)
+    .fill(null)
+    .map(() => Math.round(Math.random() * 16).toString(16))
+    .join('');
+  callback(null, `${name}-${randomName}${fileExtName}`);
+};
+const imageFileFilter = (req, file, callback) => {
+  console.log('2');
+  if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+    return callback(new Error('Only image files are allowed!'), false);
+  }
+  callback(null, true);
+};
+
 @Controller()
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    private readonly productService: ProductsService,
-  ) {}
+  constructor(private readonly appService: AppService) {}
 
   @Get()
   getHello(): string {
     return this.appService.getHello();
   }
+
+  // @Post()
+  // @UseInterceptors(
+  //   FileInterceptor('image', {
+  //     storage: diskStorage({
+  //       destination: './files',
+  //       filename: editFileName,
+  //     }),
+  //     fileFilter: imageFileFilter,
+  //   }),
+  // )
+  // async uploadMulter(@UploadedFile() file) {
+  //   const response = {
+  //     originalname: file.originalname,
+  //     filename: file.filename,
+  //   };
+  //   return response;
+  // }
 
   @Post('/uploadFile')
   async uploadFile(@Body() files: UploadFileDto[]) {

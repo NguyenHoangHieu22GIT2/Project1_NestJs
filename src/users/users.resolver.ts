@@ -24,11 +24,10 @@ export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
-  ) { }
+  ) {}
 
   @Query(() => [User], { name: 'users' })
   findAll(@userDecorator() user: User) {
-    console.log(user.email);
     return this.usersService.findAll();
   }
 
@@ -73,13 +72,19 @@ export class UsersResolver {
     const fetchedUser = await this.usersService.getCartItems(user);
     const cart = fetchedUser.cart.items;
 
-    const cartItems = cart.map(item => {
-      //@ts-ignore
-      console.log(item.productId.title)
-      //@ts-ignore
-      return { title: item.productId.title, description: item.productId.description, price: item.productId.price, imageUrl: item.productId.imageUrl, userId: item.productId.userId, quantity: item.quantity }
-    })
-    return cartItems
+    const cartItems = cart.map((item) => {
+      if (typeof item.productId === 'object') {
+        return {
+          title: item.productId.title,
+          description: item.productId.description,
+          price: item.productId.price,
+          images: item.productId.images,
+          userId: item.productId.userId,
+          quantity: item.quantity,
+        };
+      }
+    });
+    return cartItems;
   }
 
   @Mutation(() => Product)

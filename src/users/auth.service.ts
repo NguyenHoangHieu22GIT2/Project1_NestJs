@@ -74,8 +74,8 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException("User doesn't exist, please create one!");
     }
-    console.log(user.token);
     if (user.token) {
+      console.log('Im in user.token');
       return {
         message:
           'You Have To Enter the token here first to activate your account! Okay?',
@@ -85,7 +85,14 @@ export class AuthService {
     if (!doMatch) {
       throw new UnauthorizedException("Credentials don't meet my boy");
     }
-    const payload = { email, _id: user._id };
+
+    const payload = {
+      email,
+      _id: user._id,
+      userId: user._id,
+      avatar: user.avatar,
+      username: user.username,
+    };
     return {
       access_token: await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET,

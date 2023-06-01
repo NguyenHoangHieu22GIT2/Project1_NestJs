@@ -57,7 +57,7 @@ export class User {
   })
   cart: {
     items: {
-      productId: string;
+      productId: string | Product;
       quantity: number;
     }[];
   };
