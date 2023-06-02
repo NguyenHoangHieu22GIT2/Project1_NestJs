@@ -62,13 +62,13 @@ export class User {
     }[];
   };
 
-  addToCart: (productId: string) => {};
+  addToCart: (productId: string, quantity: number) => {};
   removeItemFromCart: (productId: string, quantity: number) => {};
   clearCart: () => {};
 }
 const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.methods.addToCart = function (productId: string) {
+UserSchema.methods.addToCart = function (productId: string, quantity: number) {
   const productInCart = this.cart.items.find(
     (item: cartItem) => item.productId.toString() === productId.toString(),
   ) as cartItem;
@@ -78,7 +78,7 @@ UserSchema.methods.addToCart = function (productId: string) {
   const cartItems = [...this.cart.items];
   let newQuantity = 1;
   if (productInCartIndex >= 0) {
-    productInCart.quantity += newQuantity;
+    productInCart.quantity += quantity;
     cartItems[productInCartIndex] = productInCart;
   } else {
     cartItems.push({

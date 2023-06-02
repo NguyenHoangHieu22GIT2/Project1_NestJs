@@ -6,8 +6,8 @@ input AddToCartInput {
   """Product Id"""
   productId: String!
 
-  """Token"""
-  token: String!
+  """Quantity"""
+  quantity: Float!
 }
 
 input CheckTokenInput {
@@ -189,6 +189,9 @@ type Product {
 
   """Title of the product"""
   title: String!
+
+  """User"""
+  user: User
 
   """user Id"""
   userId: String!

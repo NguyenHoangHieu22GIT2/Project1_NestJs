@@ -58,11 +58,7 @@ export class UsersResolver {
     @Args('addToCartInput') addToCartInput: AddToCartInput,
     @userDecorator() user: User,
   ) {
-    return this.usersService.addToCart(
-      addToCartInput.productId,
-      user,
-      addToCartInput.token,
-    );
+    return this.usersService.addToCart(addToCartInput, user);
   }
 
   @Query(() => [Product])

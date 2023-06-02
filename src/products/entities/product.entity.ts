@@ -1,9 +1,12 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Schema as SchemaType } from 'mongoose';
+import mongoose, { HydratedDocument, Schema as SchemaType } from 'mongoose';
 import { TagType } from './tags.type';
 import { Rating } from './rating.type';
 import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
+import { User } from 'src/users/entities/user.entity';
+
+export type ProductDocument = HydratedDocument<Product>;
 @ObjectType()
 @Schema()
 export class Product {
@@ -29,6 +32,9 @@ export class Product {
   @Field({ description: 'user Id' })
   @Prop({ type: SchemaType.Types.ObjectId, required: true, ref: 'User' })
   userId: string;
+
+  @Field({ description: 'User', nullable: true })
+  user: User;
 
   @Field(() => Int, { description: 'Quantity of the product', nullable: true })
   @Prop({ required: false, type: Number })

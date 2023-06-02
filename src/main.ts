@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
 import { json } from 'express';
 
 async function bootstrap() {

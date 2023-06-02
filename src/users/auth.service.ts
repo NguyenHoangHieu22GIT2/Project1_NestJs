@@ -74,6 +74,7 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException("User doesn't exist, please create one!");
     }
+    console.log(user);
     if (user.token) {
       console.log('Im in user.token');
       return {
@@ -105,13 +106,11 @@ export class AuthService {
   }
 
   async verifyTokenNewUser(loginVerifyToken: LoginVerifyToken) {
-    console.log('Hello World');
     const user = await this.usersService.findByToken(loginVerifyToken.token);
-    user.token = undefined;
     if (!user) {
       throw new UnauthorizedException('Wrong Token');
     }
-
+    user.token = undefined;
     return user.save();
   }
 

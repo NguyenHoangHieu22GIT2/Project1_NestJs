@@ -12,6 +12,7 @@ import { CsrfModule } from './csrf/csrf.module';
 import { ConfigModule } from '@nestjs/config';
 import { FavoriteProductsModule } from './favorite-products/favorite-products.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { MulterModule } from '@nestjs/platform-express';
     OrdersModule,
     CsrfModule,
     FavoriteProductsModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

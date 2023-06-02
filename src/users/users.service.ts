@@ -13,6 +13,7 @@ import { UpdateUserInput } from './dto/update-user.input';
 import { User, UserDocument } from './entities/user.entity';
 import { CsrfService } from 'src/csrf/csrf.service';
 import { GetCartItems } from './dto/get-cart-items.input';
+import { AddToCartInput } from './dto/add-to-cart.input';
 
 function checkUser(user: UserDocument) {
   if (!user) throw new NotFoundException('User not found!');
@@ -58,10 +59,10 @@ export class UsersService {
     return this.userModel.findByIdAndDelete(id);
   }
 
-  async addToCart(productId: string, user: User, token: string) {
-    await this.csrfService.verifyToken(token, user._id);
+  async addToCart({ productId, quantity }: AddToCartInput, user: User) {
+    // await this.csrfService.verifyToken(token, user._id);
     const product = await this.productService.findById(productId);
-    user.addToCart(product._id);
+    user.addToCart(product._id, quantity);
     return product;
   }
 
