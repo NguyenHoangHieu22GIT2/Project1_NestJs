@@ -9,7 +9,7 @@ export class CreateProductInput {
   @Field({ description: 'description of the product' })
   description: string;
   @Field({ description: 'The Image Url' })
-  imageUrl: string;
+  images: string;
   @Field({ description: 'CsrfToken' })
   token: string;
   @Field(() => Int, { description: 'Stock' })

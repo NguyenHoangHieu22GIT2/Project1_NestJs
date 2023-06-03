@@ -1,8 +1,10 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Schema as SchemaType } from 'mongoose';
+import { HydratedDocument, Schema as SchemaType } from 'mongoose';
 import { TagType } from './tags.type';
 import { Rating } from './rating.type';
+
+export type ProductDocument = HydratedDocument<Product>
 
 @ObjectType()
 @Schema()
