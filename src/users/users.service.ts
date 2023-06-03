@@ -13,6 +13,7 @@ import { UpdateUserInput } from './dto/update-user.input';
 import { User, UserDocument } from './entities/user.entity';
 import { CsrfService } from 'src/csrf/csrf.service';
 import { GetCartItems } from './dto/get-cart-items.input';
+import { AddToCartInput } from './dto/add-to-cart.input';
 
 function checkUser(user: UserDocument) {
   if (!user) throw new NotFoundException('User not found!');
@@ -26,9 +27,18 @@ export class UsersService {
     @Inject(forwardRef(() => ProductsService))
     private readonly productService: ProductsService,
     private readonly csrfService: CsrfService,
-  ) { }
+  ) {}
   async create(createUserInput: CreateUserInput) {
     return this.userModel.create({ ...createUserInput });
+  }
+
+  async updateOnline(userId: string, status: boolean) {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new BadRequestException('No User Found!');
+    }
+    user.isOnline = status;
+    return user.save();
   }
 
   findAll() {
@@ -46,32 +56,28 @@ export class UsersService {
   }
 
   async findById(id: string) {
+    console.log(id);
     const user = await this.userModel.findById(id);
     return user;
   }
 
   async update(id: string, updateUserInput: Partial<UpdateUserInput>) {
-    const user = await this.findById(id);
-
     return this.userModel.findByIdAndUpdate(id, { ...updateUserInput });
   }
 
   async remove(id: string) {
-    const user = await this.findById(id);
-
     return this.userModel.findByIdAndDelete(id);
   }
 
-  async addToCart(productId: string, user: User, token: string) {
-
-    await this.csrfService.verifyToken(token, user._id);
+  async addToCart({ productId, quantity }: AddToCartInput, user: User) {
+    // await this.csrfService.verifyToken(token, user._id);
     const product = await this.productService.findById(productId);
-    user.addToCart(product._id);
+    user.addToCart(product._id, quantity);
     return product;
   }
 
   async getCartItems(user: UserDocument) {
-    return (await this.findById(user._id)).populate("cart.items.productId");
+    return (await this.findById(user._id)).populate('cart.items.productId');
   }
   async removeItemFromCart(productId: string, quantity: number, user: User) {
     const product = await this.productService.findById(productId);

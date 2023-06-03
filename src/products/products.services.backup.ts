@@ -11,7 +11,11 @@ import mongoose, { FilterQuery, Model, ObjectId } from 'mongoose';
 import { User } from 'src/users/entities/user.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
-import { Product } from './entities/product.entity';
+import {
+  Product,
+  ProductSchema,
+  ProductDocument,
+} from './entities/product.entity';
 import { CsrfService } from 'src/csrf/csrf.service';
 import { RemoveProductInput } from './dto/remove-product.input';
 import { ProductFindOptions } from './dto/product-find-options.input';
@@ -21,6 +25,8 @@ import { randomBytes } from 'crypto';
 import { CreateRatingInput } from './dto/create-rating.input';
 import { GetRatingInput } from './dto/get-rating.input';
 import { ToggleVoteInput } from './dto/toggle-vote.input';
+import { ErrorHandler } from 'src/type/error.entity';
+import { ProductsModule } from './products.module';
 
 @Injectable()
 export class ProductsService {
@@ -28,7 +34,6 @@ export class ProductsService {
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
     private readonly csrfService: CsrfService,
   ) {}
-
   async create(createProductInput: CreateProductInput, user: User) {
     await this.csrfService.verifyToken(createProductInput.token, user._id);
     const product = this.productModel.create({
@@ -62,9 +67,7 @@ export class ProductsService {
   ) {
     const date = new Date();
     const product = await this.findById(productId);
-    if (!product) {
-      throw new BadRequestException('No Product Found!');
-    }
+
     product.ratings.push({
       rating,
       userId: user._id,
@@ -79,6 +82,7 @@ export class ProductsService {
       path: 'ratings.userId',
       select: 'username avatar',
     });
+    console.log('Hello Worldd');
     return populatedProduct;
   }
 
@@ -101,6 +105,7 @@ export class ProductsService {
     user: User,
   ) {
     const product = await this.findById(productId);
+
     let populatedProduct = await product.populate({
       path: 'ratings.userId',
       select: 'username avatar ',
@@ -137,6 +142,7 @@ export class ProductsService {
     user: User,
   ) {
     const product = await this.findById(productId);
+
     let populatedProduct = await product.populate({
       path: 'ratings.userId',
       select: 'username avatar ',
@@ -210,13 +216,8 @@ export class ProductsService {
 
   async findById(id: string) {
     if (mongoose.isValidObjectId(id)) {
-      const product = await this.productModel.findById(id);
-      await product.populate({
-        path: 'userId',
-      });
-      return product;
-    } else {
-      throw new BadRequestException('No Product Found!');
+      const result = await this.productModel.findById(id);
+      return result;
     }
   }
 
@@ -235,6 +236,7 @@ export class ProductsService {
     const products = await this.productModel.aggregate([
       { $project: { _id: 1 } },
     ]);
+    console.log(products);
     return products;
   }
 
@@ -242,8 +244,8 @@ export class ProductsService {
     await this.csrfService.verifyToken(removeProductInput.token, user._id);
 
     const product = await this.findById(removeProductInput.productId);
-    if (!product) {
-      throw new BadRequestException('No product Found!');
+    if (typeof product._id === 'number') {
+      return product;
     }
     if (product.userId !== user._id)
       throw new BadRequestException('Not your products fools');

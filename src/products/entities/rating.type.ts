@@ -1,25 +1,30 @@
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
-
-@InputType()
-export class RatingInput {
-  @Field({ description: 'comment' })
-  comment: string;
-
-  @Field(() => Int, { description: 'stars' })
-  stars: number;
-
-  @Field(() => String, { description: 'ProductId' })
-  productId: string;
-}
+import { User } from 'src/users/entities/user.entity';
 
 @ObjectType()
 export class Rating {
-  @Field({ description: 'comment' })
-  comment: string;
+  @Field({ description: '_id', nullable: true })
+  _id?: string;
+  @Field({ description: 'title' })
+  title: string;
+  @Field({ description: 'Rating' })
+  rating: string;
   @Field(() => Int, { description: 'stars' })
   stars: number;
-  @Field({ description: 'userId' })
-  userId: string;
+  @Field(() => String, { description: 'userId' })
+  userId: string | User;
   @Field(() => Date, { description: 'Date' })
   createdAt: Date;
+  @Field(() => [String], {
+    description: 'upvote of the rating',
+    defaultValue: [],
+    nullable: true,
+  })
+  upvote: string[];
+  @Field(() => [String], {
+    description: 'downvote of the rating',
+    defaultValue: [],
+    nullable: true,
+  })
+  downvote: string[];
 }

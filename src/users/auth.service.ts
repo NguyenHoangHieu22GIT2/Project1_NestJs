@@ -37,7 +37,7 @@ export class AuthService {
     else throw new BadRequestException('Wrong Token');
   }
 
-  async signup({ email, password, username }: CreateUserInput) {
+  async signup({ email, password, username, avatar }: CreateUserInput) {
     const user = await this.usersService.findOne(email);
     if (user) {
       throw new BadRequestException('User already existed!!!');
@@ -62,6 +62,7 @@ export class AuthService {
     });
     return this.usersService.create({
       email,
+      avatar,
       password: hashedPassword,
       username,
       token: token.toString(),
@@ -73,7 +74,6 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException("User doesn't exist, please create one!");
     }
-    console.log(user.token);
     if (user.token) {
       return {
         message:
@@ -84,23 +84,31 @@ export class AuthService {
     if (!doMatch) {
       throw new UnauthorizedException("Credentials don't meet my boy");
     }
-    const payload = { email, _id: user._id };
+
+    const payload = {
+      email,
+      _id: user._id,
+      userId: user._id,
+      avatar: user.avatar,
+      username: user.username,
+    };
     return {
       access_token: await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET,
       }),
       userId: user._id,
+      email: user.email,
+      avatar: user.avatar,
+      username: user.username,
     };
   }
 
   async verifyTokenNewUser(loginVerifyToken: LoginVerifyToken) {
-    console.log('Hello World');
     const user = await this.usersService.findByToken(loginVerifyToken.token);
-    user.token = undefined;
     if (!user) {
       throw new UnauthorizedException('Wrong Token');
     }
-
+    user.token = undefined;
     return user.save();
   }
 

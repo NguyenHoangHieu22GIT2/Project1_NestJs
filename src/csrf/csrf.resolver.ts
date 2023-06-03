@@ -4,15 +4,18 @@ import { Csrf } from './entities/csrf.entity';
 import { CreateCsrfInput } from './dto/create-csrf.input';
 import { UpdateCsrfInput } from './dto/update-csrf.input';
 import { CheckTokenInput } from './dto/check-token.input';
+import { Injectable } from '@nestjs/common';
 
 @Resolver(() => Csrf)
+@Injectable()
 export class CsrfResolver {
-  constructor(private readonly csrfService: CsrfService) { }
+  constructor(private readonly csrfService: CsrfService) {}
 
   @Mutation(() => Csrf)
-  async createCsrfToken(@Args('userId', { type: () => String }) userId: string) {
+  async createCsrfToken(
+    @Args('userId', { type: () => String }) userId: string,
+  ) {
     const token = await this.csrfService.createToken(userId);
-    console.log(token)
     return token;
   }
 

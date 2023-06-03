@@ -7,4 +7,10 @@ export class jwtToken {
 
   @Field({ description: 'User ID' })
   userId: string;
+  @Field({ description: 'Username' })
+  username: string;
+  @Field({ description: 'avatar' })
+  avatar: string;
+  @Field({ description: 'email' })
+  email: string;
 }

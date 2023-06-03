@@ -8,8 +8,8 @@ export class CreateProductInput {
   price: number;
   @Field({ description: 'description of the product' })
   description: string;
-  @Field({ description: 'The Image Url' })
-  images: string;
+  @Field(() => [String], { nullable: true })
+  images: string[];
   @Field({ description: 'CsrfToken' })
   token: string;
   @Field(() => Int, { description: 'Stock' })

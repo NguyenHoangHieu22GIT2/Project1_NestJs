@@ -22,6 +22,5 @@ export class Csrf {
 
 const CsrfSchema = SchemaFactory.createForClass(Csrf);
 
-// CsrfSchema.index({ createdAt: 1 }, { expireAfterSeconds: 10 });
 
 export { CsrfSchema };

@@ -1,11 +1,12 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as SchemaType } from 'mongoose';
+import mongoose, { HydratedDocument, Schema as SchemaType } from 'mongoose';
 import { TagType } from './tags.type';
 import { Rating } from './rating.type';
+import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
+import { User } from 'src/users/entities/user.entity';
 
-export type ProductDocument = HydratedDocument<Product>
-
+export type ProductDocument = HydratedDocument<Product>;
 @ObjectType()
 @Schema()
 export class Product {
@@ -24,20 +25,23 @@ export class Product {
   @Prop({ type: String, required: true })
   description: string;
 
-  @Field({ description: 'image of the product' })
-  @Prop({ type: String, required: true })
-  imageUrl: string;
+  @Field(() => [String])
+  @Prop({ type: [String], required: true })
+  images: string[];
 
   @Field({ description: 'user Id' })
   @Prop({ type: SchemaType.Types.ObjectId, required: true, ref: 'User' })
   userId: string;
+
+  @Field(() => User, { description: 'User', nullable: true })
+  user: User;
 
   @Field(() => Int, { description: 'Quantity of the product', nullable: true })
   @Prop({ required: false, type: Number })
   quantity: number;
 
   @Field(() => [Rating], {
-    description: 'Stock of the products',
+    description: 'Rating of a product',
     nullable: true,
   })
   @Prop({
@@ -50,7 +54,12 @@ export class Product {
           ref: 'User',
           _id: false,
         },
-        comment: {
+        rating: {
+          type: String,
+          required: true,
+          _id: false,
+        },
+        title: {
           type: String,
           required: true,
           _id: false,
@@ -65,7 +74,20 @@ export class Product {
           required: true,
           _id: false,
         },
-        _id: false,
+        upvote: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'User',
+          },
+        ],
+        downvote: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'User',
+          },
+        ],
       },
     ],
     default: [],

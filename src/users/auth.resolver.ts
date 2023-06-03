@@ -20,9 +20,9 @@ export class AuthResolver {
   }
 
   @Query(() => LoginUnionResult)
-  login(@Args('loginUserInput') loginUserInput: LoginUserInput) {
-    console.log('ASD');
-    return this.authService.signin(loginUserInput);
+  async login(@Args('loginUserInput') loginUserInput: LoginUserInput) {
+    const loginInfo = await this.authService.signin(loginUserInput);
+    return loginInfo;
   }
 
   @Query(() => User)
@@ -44,7 +44,8 @@ export class AuthResolver {
   }
 
   @Query(() => User, { name: 'CheckJwtToken' })
-  checkToken(@Args('token', { type: () => String }) token: string) {
-    return this.authService.validate(token);
+  async checkToken(@Args('token', { type: () => String }) token: string) {
+    const infos = await this.authService.validate(token);
+    return infos;
   }
 }
