@@ -16,21 +16,24 @@ export class User {
   _id: string;
 
   @Field({ description: 'email of the user' })
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   email: string;
 
+  @Field({ description: 'avatar of the user' })
+  @Prop({ required: true, type: String })
+  avatar: string;
   @Field({ description: 'password of the user' })
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   password: string;
 
   @Field({ description: 'username of the user' })
-  @Prop({ required: true })
+  @Prop({ required: true, type: String })
   username: string;
 
-  @Prop({ required: false })
+  @Prop({ required: false, type: String })
   token: string;
 
-  @Prop({ required: false })
+  @Prop({ required: false, type: Date })
   tokenDate: Date;
 
   @Prop({
@@ -54,18 +57,22 @@ export class User {
   })
   cart: {
     items: {
-      productId: string;
+      productId: string | Product;
       quantity: number;
     }[];
   };
 
-  addToCart: (productId: string) => {};
+  @Field(() => Boolean, { description: 'Online Status' })
+  @Prop({ required: true, type: Boolean, default: false })
+  isOnline: boolean;
+
+  addToCart: (productId: string, quantity: number) => {};
   removeItemFromCart: (productId: string, quantity: number) => {};
   clearCart: () => {};
 }
 const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.methods.addToCart = function (productId: string) {
+UserSchema.methods.addToCart = function (productId: string, quantity: number) {
   const productInCart = this.cart.items.find(
     (item: cartItem) => item.productId.toString() === productId.toString(),
   ) as cartItem;
@@ -75,7 +82,7 @@ UserSchema.methods.addToCart = function (productId: string) {
   const cartItems = [...this.cart.items];
   let newQuantity = 1;
   if (productInCartIndex >= 0) {
-    productInCart.quantity += newQuantity;
+    productInCart.quantity += quantity;
     cartItems[productInCartIndex] = productInCart;
   } else {
     cartItems.push({

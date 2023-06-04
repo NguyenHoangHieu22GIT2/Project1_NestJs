@@ -6,8 +6,8 @@ input AddToCartInput {
   """Product Id"""
   productId: String!
 
-  """Token"""
-  token: String!
+  """Quantity"""
+  quantity: Float!
 }
 
 input CheckTokenInput {
@@ -24,9 +24,7 @@ input CreateProductInput {
 
   """discount"""
   discount: Int
-
-  """The Image Url"""
-  imageUrl: String!
+  images: [String!]
 
   """price of the product"""
   price: Int!
@@ -44,7 +42,24 @@ input CreateProductInput {
   token: String!
 }
 
+input CreateRatingInput {
+  """the product to rate"""
+  productId: String!
+
+  """The rating"""
+  rating: String!
+
+  """The star"""
+  stars: Int!
+
+  """The title of the rating"""
+  title: String!
+}
+
 input CreateUserInput {
+  """avatar"""
+  avatar: String
+
   """email"""
   email: String!
 
@@ -98,6 +113,17 @@ input FindFavoriteProduct {
   userId: String!
 }
 
+input GetRatingInput {
+  """Limit the rating"""
+  limit: Int!
+
+  """productId to find"""
+  productId: String!
+
+  """Skip the rating"""
+  skip: Int!
+}
+
 union LoginUnionResult = ErrorHandler | jwtToken
 
 input LoginUserInput {
@@ -113,18 +139,31 @@ input LoginVerifyToken {
   token: String!
 }
 
+type MessageTypeHistory {
+  """date"""
+  date: DateTime!
+
+  """message"""
+  message: String!
+
+  """Sender"""
+  sender: String!
+}
+
 type Mutation {
+  AddRating(createRatingInput: CreateRatingInput!): Rating!
   addToCart(addToCartInput: AddToCartInput!): Product!
   createCsrfToken(userId: String!): Csrf!
   createOrder: Order!
   createProduct(createProductInput: CreateProductInput!): Product!
-  rating(ratingInput: RatingInput!): Product!
   register(createUserInput: CreateUserInput!): User!
   removeItemFromCart(removeItemFromCartInput: RemoveItemFromCartInput!): Product!
   removeProduct(removeProductInput: RemoveProductInput!): Product!
   removeUser(id: String!): User!
   resetPassword(resetPasswordInput: ResetPasswordInput!): User!
+  toggleDownvote(toggleDownvoteInput: ToggleVoteInput!): Rating!
   toggleFavoriteProduct(toggleFavoriteProductInput: ToggleFavoriteProductInput!): FavoriteProduct!
+  toggleUpvote(toggleUpvoteInput: ToggleVoteInput!): Rating!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
@@ -145,9 +184,7 @@ type Product {
 
   """has Sold of the product"""
   hasSold: Int!
-
-  """image of the product"""
-  imageUrl: String!
+  images: [String!]!
 
   """price of the product"""
   price: Int!
@@ -155,7 +192,7 @@ type Product {
   """Quantity of the product"""
   quantity: Int
 
-  """Stock of the products"""
+  """Rating of a product"""
   ratings: [Rating!]
 
   """Stock of the products"""
@@ -164,19 +201,22 @@ type Product {
   """Title of the product"""
   title: String!
 
+  """User"""
+  user: User
+
   """user Id"""
   userId: String!
 }
 
 input ProductFindOptions {
   """Limit the number of received Products..."""
-  limit: Int!
+  limit: Int
 
   """ProductId so That we can find related Product"""
   productId: String
 
   """skip the number of the Products..."""
-  skip: Int!
+  skip: Int
 
   """Filter Words"""
   words: String
@@ -191,7 +231,9 @@ type Query {
   findProductById(id: String!): Product!
   findRecommendedProducts(productFindOptions: ProductFindOptions!): [Product!]!
   forgetPassword(email: String!): User!
+  getAllMessages: [User!]!
   getCartItems: [Product!]!
+  getRatings(getRatingInput: GetRatingInput!): [Rating!]!
   login(loginUserInput: LoginUserInput!): LoginUnionResult!
   order(id: Int!): Order!
   orders: [Order!]!
@@ -205,28 +247,29 @@ type Query {
 }
 
 type Rating {
-  """comment"""
-  comment: String!
+  """_id"""
+  _id: String
 
   """Date"""
   createdAt: DateTime!
 
+  """downvote of the rating"""
+  downvote: [String!]
+
+  """Rating"""
+  rating: String!
+
   """stars"""
   stars: Int!
+
+  """title"""
+  title: String!
+
+  """upvote of the rating"""
+  upvote: [String!]
 
   """userId"""
   userId: String!
-}
-
-input RatingInput {
-  """comment"""
-  comment: String!
-
-  """ProductId"""
-  productId: String!
-
-  """stars"""
-  stars: Int!
 }
 
 input RemoveItemFromCartInput {
@@ -270,6 +313,14 @@ input ToggleFavoriteProductInput {
   userId: String!
 }
 
+input ToggleVoteInput {
+  """productId"""
+  productId: String!
+
+  """ratingId"""
+  ratingId: String!
+}
+
 input UpdateProductInput {
   """Id of the product"""
   _id: String!
@@ -282,6 +333,7 @@ input UpdateProductInput {
 
   """image Url of the product"""
   imageUrl: String
+  images: [String!]
 
   """price of the product"""
   price: Int
@@ -303,6 +355,9 @@ input UpdateUserInput {
   """ID"""
   _id: String!
 
+  """avatar"""
+  avatar: String
+
   """email"""
   email: String
 
@@ -317,8 +372,14 @@ type User {
   """Id of The user"""
   _id: String!
 
+  """avatar of the user"""
+  avatar: String!
+
   """email of the user"""
   email: String!
+
+  """Online Status"""
+  isOnline: Boolean!
 
   """password of the user"""
   password: String!
@@ -331,6 +392,15 @@ type jwtToken {
   """Access Token for user loggedin"""
   access_token: String!
 
+  """avatar"""
+  avatar: String!
+
+  """email"""
+  email: String!
+
   """User ID"""
   userId: String!
+
+  """Username"""
+  username: String!
 }

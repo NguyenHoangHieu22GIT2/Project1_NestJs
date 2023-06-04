@@ -22,10 +22,13 @@ export class CreateUserInput {
   })
   password: string;
 
+  @Field({ description: 'avatar', nullable: true })
+  avatar: string;
+
   @Field({ description: 'username' })
   @IsString()
   @MinLength(5)
   username: string;
 
-  token?: string
+  token?: string;
 }

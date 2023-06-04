@@ -13,7 +13,7 @@ export class AuthInterceptor implements NestInterceptor {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
   async intercept(context: ExecutionContext, next: CallHandler<any>) {
     const req = GqlExecutionContext.create(context).getContext().req;
 
