@@ -8,4 +8,7 @@ export class GetRatingInput {
   limit: number;
   @Field(() => Int, { description: 'Skip the rating' })
   skip: number;
+
+  @Field(() => Int, { description: 'Stars', nullable: true })
+  stars: number;
 }

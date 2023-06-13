@@ -68,7 +68,6 @@ export class UsersResolver {
   async getCartItems(@userDecorator() user: UserDocument) {
     // const fetchedUser = await this.usersService.getCartItems(user);
     // const cart = fetchedUser.cart.items;
-
     // const cartItems = cart.map((item) => {
     //   if (typeof item.productId === 'object') {
     //     return {

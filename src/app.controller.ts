@@ -6,9 +6,10 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { fstat, unlink, writeFile } from 'fs';
@@ -38,10 +39,12 @@ const imageFileFilter = (req, file, callback) => {
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
+  // @Put()
+  // @UseInterceptors(FilesInterceptor('files'))
+  // getHello(@UploadedFiles() file: Express.Multer.File): string {
+  //   console.log('Hello');
+  //   return 'hello world';
+  // }
 
   // @Post()
   // @UseInterceptors(
@@ -61,9 +64,15 @@ export class AppController {
   //   return response;
   // }
 
+  // @Post('/uploadFile')
+  // @UseInterceptors(FilesInterceptor('files'))
+  // async uploadFile(@UploadedFiles() file: Express.Multer.File) {
+  //   console.log('Hello --------------');
+  //   console.log(file);
+  // }
   @Post('/uploadFile')
   async uploadFile(@Body() files: UploadFileDto[]) {
-    console.log(files);
+    console.log('Hello World');
     const fileBuffers: Buffer[] = [];
     files.forEach((file) => {
       let data = file.fileBase64.replace(/^data:image\/\w+;base64,/, '');

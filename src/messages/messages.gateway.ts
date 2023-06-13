@@ -16,6 +16,7 @@ import { JoinRoomDto } from './dto/join-room.dto';
 import { User } from 'src/users/entities/user.entity';
 import { ProductsService } from 'src/products/products.service';
 import { UsersService } from 'src/users/users.service';
+import { SendNotificationDto } from './dto/send-notification.dto';
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -32,6 +33,7 @@ export class MessagesGateway
     private readonly messagesService: MessagesService,
     private readonly userService: UsersService,
   ) {}
+
   async handleConnection(@ConnectedSocket() socket: Socket, ...args: any[]) {
     // console.log('New client connected:', socket.id);
     const userId = socket.handshake.query.userId as string;
@@ -74,10 +76,13 @@ export class MessagesGateway
 
   @SubscribeMessage('joinRoomFull')
   async joinRoomFull(
-    @MessageBody() joinRoomDto: string[],
+    @MessageBody() joinRoomDto: JoinRoomDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    const room = await this.messagesService.joinRoom(joinRoomDto);
+    const room = await this.messagesService.joinRoom(
+      joinRoomDto.users,
+      joinRoomDto.joinerId,
+    );
     await room.populate({
       path: 'users._id',
       select: 'username',
@@ -102,10 +107,13 @@ export class MessagesGateway
 
   @SubscribeMessage('joinRoomLite')
   async joinRoomLite(
-    @MessageBody() joinRoomDto: string[],
+    @MessageBody() joinRoomDto: JoinRoomDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    const room = await this.messagesService.joinRoom(joinRoomDto);
+    const room = await this.messagesService.joinRoom(
+      joinRoomDto.users,
+      joinRoomDto.joinerId,
+    );
     await room.populate({
       path: 'users._id',
       select: 'username',
@@ -124,6 +132,17 @@ export class MessagesGateway
   async create(@MessageBody() createMessageDto: CreateMessageDto) {
     const message = await this.messagesService.sendMessage(createMessageDto);
     this.server.in(createMessageDto.roomId).emit('sendMessage', message);
+    // const room = await this.messagesService.findRoom(createMessageDto.roomId);
+    // const receiver = room.users.filter(
+    //   (user) => user._id.toString() !== createMessageDto.senderId.toString(),
+    // )[0];
+    // this.connectedUsers.forEach((socket, userIdentification) => {
+    // if (receiver._id.toString() === userIdentification.toString()) {
+    //     this.server
+    //       .to(socket.id)
+    //       .emit('sendNotification', { notification: room.notification });
+    //   }
+    // });
   }
 
   @SubscribeMessage('findAllMessages')

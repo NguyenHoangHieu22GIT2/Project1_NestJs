@@ -1,9 +1,7 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Schema as SchemaType } from 'mongoose';
-import { TagType } from './tags.type';
 import { Rating } from './rating.type';
-import * as GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import { User } from 'src/users/entities/user.entity';
 
 export type ProductDocument = HydratedDocument<Product>;
@@ -17,7 +15,7 @@ export class Product {
   @Prop({ type: String, required: true })
   title: string;
 
-  @Field(() => Int, { description: 'price of the product' })
+  @Field(() => Float, { description: 'price of the product' })
   @Prop({ type: Number, required: true })
   price: number;
 

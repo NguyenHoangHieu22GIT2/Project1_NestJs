@@ -21,6 +21,7 @@ import { randomBytes } from 'crypto';
 import { CreateRatingInput } from './dto/create-rating.input';
 import { GetRatingInput } from './dto/get-rating.input';
 import { ToggleVoteInput } from './dto/toggle-vote.input';
+import { ProductCountInput } from './dto/product-count.input';
 
 @Injectable()
 export class ProductsService {
@@ -60,11 +61,13 @@ export class ProductsService {
     { rating, title, productId, stars }: CreateRatingInput,
     user: User,
   ) {
+    console.log('1');
     const date = new Date();
     const product = await this.findById(productId);
     if (!product) {
       throw new BadRequestException('No Product Found!');
     }
+    console.log(rating, title, productId, stars);
     product.ratings.push({
       rating,
       userId: user._id,
@@ -74,21 +77,30 @@ export class ProductsService {
       upvote: [],
       downvote: [],
     });
+    console.log('3');
+
     await product.save();
+    console.log('4');
+
     const populatedProduct = await product.populate({
       path: 'ratings.userId',
       select: 'username avatar',
     });
+    console.log('5');
+
     return populatedProduct;
   }
 
-  async getRatings({ limit, productId, skip }: GetRatingInput) {
+  async getRatings({ limit, productId, skip, stars = 5 }: GetRatingInput) {
     if (limit <= 0) {
       limit = 1;
     }
     const product = await this.productModel.findById(productId, {
       ratings: { $slice: [skip, limit] },
     });
+    if (!product) {
+      throw new BadRequestException('No Product Found!');
+    }
     const populatedProduct = await product.populate({
       path: 'ratings.userId',
       select: 'username avatar ',
@@ -193,28 +205,37 @@ export class ProductsService {
       .limit(productFindOptions.limit);
   }
 
-  findNumberOfAllProducts(productFindOptions: ProductFindOptions) {
+  findNumberOfAllProducts(productCountInput: ProductCountInput) {
     const filters: FilterQuery<Product> = {};
 
-    if (productFindOptions.words) {
+    if (productCountInput.words) {
       filters.$text = {
-        $search: productFindOptions.words,
+        $search: productCountInput.words,
       };
+    }
+    if (productCountInput.userId) {
+      filters.userId = productCountInput.userId;
     }
     return this.productModel.find(filters).count();
   }
 
-  findAllOfUsers(user: User) {
-    return this.productModel.find({ userId: user._id });
+  findAllOfUsers(userId: string) {
+    if (mongoose.isValidObjectId(userId))
+      return this.productModel.find({ userId });
+    else throw new BadRequestException('No User Found!');
   }
 
   async findById(id: string) {
     if (mongoose.isValidObjectId(id)) {
       const product = await this.productModel.findById(id);
-      await product.populate({
-        path: 'userId',
-      });
-      return product;
+      if (product) {
+        await product.populate({
+          path: 'userId',
+        });
+        return product;
+      } else {
+        throw new BadRequestException('No Product Found!');
+      }
     } else {
       throw new BadRequestException('No Product Found!');
     }

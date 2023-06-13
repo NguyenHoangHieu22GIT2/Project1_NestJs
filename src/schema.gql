@@ -27,7 +27,7 @@ input CreateProductInput {
   images: [String!]
 
   """price of the product"""
-  price: Int!
+  price: Float!
 
   """Stock"""
   stock: Int!
@@ -122,6 +122,9 @@ input GetRatingInput {
 
   """Skip the rating"""
   skip: Int!
+
+  """Stars"""
+  stars: Int
 }
 
 union LoginUnionResult = ErrorHandler | jwtToken
@@ -187,7 +190,7 @@ type Product {
   images: [String!]!
 
   """price of the product"""
-  price: Int!
+  price: Float!
 
   """Quantity of the product"""
   quantity: Int
@@ -208,6 +211,14 @@ type Product {
   userId: String!
 }
 
+input ProductCountInput {
+  """Find all products of one user"""
+  userId: String
+
+  """Filter Words"""
+  words: String
+}
+
 input ProductFindOptions {
   """Limit the number of received Products..."""
   limit: Int
@@ -225,7 +236,7 @@ input ProductFindOptions {
 type Query {
   CheckCsrfToken(checkTokenInput: CheckTokenInput!): Csrf!
   CheckJwtToken(token: String!): User!
-  countProducts(productFindOptions: ProductFindOptions!): Int!
+  countProducts(productCountInput: ProductCountInput!): Int!
   favoriteProduct(toggleFavoriteProductInput: ToggleFavoriteProductInput!): FavoriteProduct!
   favoriteProducts(findFavoriteProduct: FindFavoriteProduct!): [FavoriteProduct!]!
   findProductById(id: String!): Product!
@@ -238,7 +249,7 @@ type Query {
   order(id: Int!): Order!
   orders: [Order!]!
   products(productFindOptions: ProductFindOptions!): [Product!]!
-  productsOfUser: [Product!]!
+  productsOfUser(userId: String!): [Product!]!
   test: Product!
   userFindByEmail(email: String!): User!
   userFindById(id: String!): User!

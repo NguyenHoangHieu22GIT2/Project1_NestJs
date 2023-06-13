@@ -15,6 +15,7 @@ import { Rating } from './entities/rating.type';
 import { GetRatingInput } from './dto/get-rating.input';
 import { ToggleVoteInput } from './dto/toggle-vote.input';
 import { getLatestCreatedRating, getRating } from 'src/utils/ratingHelper';
+import { ProductCountInput } from './dto/product-count.input';
 
 @Resolver(() => Product)
 @Injectable()
@@ -39,9 +40,10 @@ export class ProductsResolver {
     @Args('createRatingInput') ratingInput: CreateRatingInput,
     @userDecorator() user: User,
   ) {
-    const ratings = (
-      await this.productsService.addRating(ratingInput, user)
-    ).toObject().ratings;
+    console.log('Hello');
+    const realratings = await this.productsService.addRating(ratingInput, user);
+    console.log(realratings);
+    const ratings = realratings.toObject().ratings;
     let rating: Rating[];
     let date: Date;
     ratings.forEach((curRating, index) => {
@@ -83,7 +85,16 @@ export class ProductsResolver {
     result.sort((a, b) => {
       return b.createdAt.getTime() - a.createdAt.getTime();
     });
-    return result;
+    console.log('--------');
+    console.log(result);
+    console.log('--------');
+    return result.filter((rating) => {
+      if (getRatingInput.stars) {
+        return rating.stars === getRatingInput.stars;
+      } else {
+        return true;
+      }
+    });
   }
 
   @Mutation(() => Rating)
@@ -131,9 +142,9 @@ export class ProductsResolver {
 
   @Query(() => Int, { name: 'countProducts' })
   findNumberOfAllProducts(
-    @Args('productFindOptions') productFindOptions: ProductFindOptions,
+    @Args('productCountInput') productCountInput: ProductCountInput,
   ) {
-    return this.productsService.findNumberOfAllProducts(productFindOptions);
+    return this.productsService.findNumberOfAllProducts(productCountInput);
   }
 
   @Query(() => [Product], { name: 'findRecommendedProducts' })
@@ -144,8 +155,8 @@ export class ProductsResolver {
   }
 
   @Query(() => [Product], { name: 'productsOfUser' })
-  findProductsOfUser(@userDecorator() user: User) {
-    return this.productsService.findAllOfUsers(user);
+  findProductsOfUser(@Args('userId') userId: string) {
+    return this.productsService.findAllOfUsers(userId);
   }
 
   @Query(() => Product, { name: 'findProductById' })

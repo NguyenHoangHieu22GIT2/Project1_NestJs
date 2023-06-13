@@ -20,6 +20,7 @@ export class AuthInterceptor implements NestInterceptor {
     const token = req.token.split(' ')[1];
     const payload = await this.authService.validate(token);
     const user = await this.usersService.findById(payload._id);
+
     req.user = user;
     return next.handle();
   }
