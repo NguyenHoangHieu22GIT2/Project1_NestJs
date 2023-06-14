@@ -85,7 +85,6 @@ export class ProductsResolver {
     result.sort((a, b) => {
       return b.createdAt.getTime() - a.createdAt.getTime();
     });
-    console.log('--------');
     console.log(result);
     console.log('--------');
     return result.filter((rating) => {
@@ -190,10 +189,10 @@ export class ProductsResolver {
     return this.productsService.remove(removeProductInput, user);
   }
 
-  @Query(() => Product)
-  @UseInterceptors(AuthInterceptor)
-  @UseGuards(AuthGuard)
-  test(@userDecorator() user: User) {
-    return this.productsService.getCartItems(user._id);
+  @Query(() => Int)
+  async getRatingsCount(
+    @Args('productId', { type: () => String }) productId: string,
+  ) {
+    return await this.productsService.getRatingCounts(productId);
   }
 }

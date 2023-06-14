@@ -108,6 +108,13 @@ export class ProductsService {
     // console.log(populatedProduct.ratings);
     return populatedProduct;
   }
+
+  async getRatingCounts(productId: string) {
+    const productRatingsCount = (await this.productModel.findById(productId))
+      .ratings.length;
+    return productRatingsCount;
+  }
+
   async toggleUpvoteRating(
     { productId, ratingId }: ToggleVoteInput,
     user: User,
