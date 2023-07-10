@@ -13,8 +13,11 @@ export class MessagesService {
   constructor(
     @InjectModel(Message.name) private readonly messageModel: Model<Message>,
   ) {}
+  async findRoom(roomId: string) {
+    return this.messageModel.findOne({ roomId });
+  }
 
-  async joinRoom(users: string[]) {
+  async joinRoom(users: string[], joinerId: string) {
     let roomId = '';
     users.sort();
     users.forEach((user, index) => {
@@ -22,7 +25,7 @@ export class MessagesService {
         roomId += user;
       } else roomId += '-' + user;
     });
-    const room = await this.messageModel.findOne({ roomId });
+    const room = await this.findRoom(roomId);
     let usersId = users.map((user) => ({
       _id: user,
     }));
@@ -32,7 +35,15 @@ export class MessagesService {
         roomId: roomId,
         users: usersId,
       });
-    } else return room;
+    } else {
+      if (
+        room.notification.userId &&
+        room.notification.userId.toString() === joinerId.toString()
+      ) {
+        room.notification = { quantityOfMessages: 0, userId: '' };
+      }
+      return room.save();
+    }
   }
 
   async getAllUserInRoom(userId: string): Promise<Partial<User>[]> {
@@ -60,21 +71,25 @@ export class MessagesService {
       )[0];
       return userIdentification;
     });
-    console.log(otherUsers);
     return otherUsers;
   }
 
-  async sendMessage({ date, roomId, sender, message }: CreateMessageDto) {
+  async sendMessage({ date, roomId, senderId, message }: CreateMessageDto) {
     const room = await this.messageModel.findOne({ roomId });
     const theMessage = {
       date,
       message,
-      sender,
+      sender: senderId,
     };
+    const receiver = room.users.filter(
+      (user) => user._id.toString() !== senderId.toString(),
+    )[0];
     if (!room) {
       //TODO : Handle bugs if room is not found!
       // throw new BadRequestException("")
     } else {
+      room.notification.userId = receiver._id;
+      room.notification.quantityOfMessages += 1;
       room.history.push(theMessage);
       await room.save();
       return theMessage;

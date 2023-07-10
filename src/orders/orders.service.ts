@@ -18,19 +18,20 @@ export class OrdersService {
       throw new BadRequestException('No Cart Item to order');
     }
     const promises = user.cart.items.map(async (item) => {
-      if (typeof item.productId === 'string') {
-        const product = await this.productService.findById(item.productId);
-        product.quantity = item.quantity;
-        return product;
-      }
+      const productId = item.productId.toString();
+      const product = await this.productService.findById(productId);
+      product.quantity = item.quantity;
+      console.log(product);
+      return product;
     });
     const products = await Promise.all(promises);
     user.clearCart();
     return this.orderModel.create({ products, userId: user._id });
   }
 
-  findAll() {
-    return `This action returns all orders`;
+  findAll(user: User) {
+    console.log(user);
+    return this.orderModel.find({ userId: user._id.toString() });
   }
 
   findOne(id: number) {

@@ -15,6 +15,7 @@ import { Rating } from './entities/rating.type';
 import { GetRatingInput } from './dto/get-rating.input';
 import { ToggleVoteInput } from './dto/toggle-vote.input';
 import { getLatestCreatedRating, getRating } from 'src/utils/ratingHelper';
+import { ProductCountInput } from './dto/product-count.input';
 
 @Resolver(() => Product)
 @Injectable()
@@ -39,9 +40,8 @@ export class ProductsResolver {
     @Args('createRatingInput') ratingInput: CreateRatingInput,
     @userDecorator() user: User,
   ) {
-    const ratings = (
-      await this.productsService.addRating(ratingInput, user)
-    ).toObject().ratings;
+    const realratings = await this.productsService.addRating(ratingInput, user);
+    const ratings = realratings.toObject().ratings;
     let rating: Rating[];
     let date: Date;
     ratings.forEach((curRating, index) => {
@@ -83,7 +83,13 @@ export class ProductsResolver {
     result.sort((a, b) => {
       return b.createdAt.getTime() - a.createdAt.getTime();
     });
-    return result;
+    return result.filter((rating) => {
+      if (getRatingInput.stars) {
+        return rating.stars === getRatingInput.stars;
+      } else {
+        return true;
+      }
+    });
   }
 
   @Mutation(() => Rating)
@@ -131,9 +137,9 @@ export class ProductsResolver {
 
   @Query(() => Int, { name: 'countProducts' })
   findNumberOfAllProducts(
-    @Args('productFindOptions') productFindOptions: ProductFindOptions,
+    @Args('productCountInput') productCountInput: ProductCountInput,
   ) {
-    return this.productsService.findNumberOfAllProducts(productFindOptions);
+    return this.productsService.findNumberOfAllProducts(productCountInput);
   }
 
   @Query(() => [Product], { name: 'findRecommendedProducts' })
@@ -144,16 +150,18 @@ export class ProductsResolver {
   }
 
   @Query(() => [Product], { name: 'productsOfUser' })
-  findProductsOfUser(@userDecorator() user: User) {
-    return this.productsService.findAllOfUsers(user);
+  findProductsOfUser(@Args('userId') userId: string) {
+    return this.productsService.findAllOfUsers(userId);
   }
 
   @Query(() => Product, { name: 'findProductById' })
   async findById(@Args('id', { type: () => String }) id: string) {
-    const product = (await this.productsService.findById(id)).toObject();
+    const product = await this.productsService.findById(id);
+    await product.populate({
+      path: 'userId',
+    });
     if (typeof product.userId === 'object') {
       product.user = product.userId;
-
       product.userId = product.user._id;
     }
     return product;
@@ -179,10 +187,10 @@ export class ProductsResolver {
     return this.productsService.remove(removeProductInput, user);
   }
 
-  @Query(() => Product)
-  @UseInterceptors(AuthInterceptor)
-  @UseGuards(AuthGuard)
-  test(@userDecorator() user: User) {
-    return this.productsService.getCartItems(user._id);
+  @Query(() => Int)
+  async getRatingsCount(
+    @Args('productId', { type: () => String }) productId: string,
+  ) {
+    return await this.productsService.getRatingCounts(productId);
   }
 }

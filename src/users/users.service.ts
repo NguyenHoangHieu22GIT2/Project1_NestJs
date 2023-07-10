@@ -56,9 +56,12 @@ export class UsersService {
   }
 
   async findById(id: string) {
-    console.log(id);
-    const user = await this.userModel.findById(id);
-    return user;
+    if (mongoose.isValidObjectId(id)) {
+      const user = await this.userModel.findById(id);
+      return user;
+    } else {
+      throw new BadRequestException('No User Found!');
+    }
   }
 
   async update(id: string, updateUserInput: Partial<UpdateUserInput>) {

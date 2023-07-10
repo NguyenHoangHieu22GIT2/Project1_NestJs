@@ -1,28 +1,35 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Schema as SchemaType } from 'mongoose'
+import mongoose, { Schema as SchemaType } from 'mongoose';
+import { Product } from 'src/products/entities/product.entity';
 import { User } from 'src/users/entities/user.entity';
 
 @ObjectType()
 @Schema()
 export class Order {
+  @Field(() => String)
+  _id: string;
+
+  @Field(() => [Product])
   @Prop({
     type: [
       {
         title: { type: String, required: true },
         description: { type: String, required: true },
         price: { type: Number, required: true },
-        imageUrl: { type: String, required: true },
+        images: { type: [String], required: true },
         quantity: { type: Number, required: true },
-        _id: false
+        discount: { type: Number, required: false },
+        _id: { type: mongoose.Types.ObjectId, required: true },
       },
-    ], _id: false
+    ],
+    _id: false,
   })
-  products: []
+  products: [];
 
   @Field(() => String)
-  @Prop({ required: true, ref: "User" })
-  userId: string
+  @Prop({ required: true, ref: 'User' })
+  userId: string;
 }
 
-export const OrderSchema = SchemaFactory.createForClass(Order)
+export const OrderSchema = SchemaFactory.createForClass(Order);

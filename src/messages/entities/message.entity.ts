@@ -53,5 +53,22 @@ export class Message {
     default: [],
   })
   history: MessageTypeHistory[];
+
+  @Prop({
+    required: true,
+    type: {
+      userId: {
+        type: String,
+        _id: false,
+      },
+      quantityOfMessages: {
+        type: Number,
+        required: true,
+      },
+      _id: false,
+    },
+    default: { userId: '', quantityOfMessages: 0 },
+  })
+  notification: { userId: string; quantityOfMessages: number };
 }
 export const MessageSchema = SchemaFactory.createForClass(Message);

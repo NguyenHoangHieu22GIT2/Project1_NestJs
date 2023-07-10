@@ -3,8 +3,10 @@ import { FavoriteProductsService } from './favorite-products.service';
 import { FavoriteProduct } from './entities/favorite-product.entity';
 import { ToggleFavoriteProductInput } from './dto/toggle-favorite-product.input';
 import { FindFavoriteProduct } from './dto/find-favorite-product.input';
+import { Injectable } from '@nestjs/common';
 
 @Resolver(() => FavoriteProduct)
+@Injectable()
 export class FavoriteProductsResolver {
   constructor(private readonly favoriteProductsService: FavoriteProductsService) { }
 

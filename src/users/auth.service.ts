@@ -54,7 +54,7 @@ export class AuthService {
       from: 'hoanghieufro@gmail.com',
       to: email,
       subject: 'Thank you for trusting our service!',
-      html: `<h1>Welcome abroad</h1> 
+      html: `<h1>Welcome abroad</h1>
       <h3>I as the CEO of K-rose, want to thank you for joining one of the best company about selling in the world, suit yourself and let's have the best deal ever<h3>
       <p>Of course, just to make sure, The time you logged in the first time, you will have to use a token that I will provide to you to prove that you are a real user and not just some crap dude out there.</p>
       <code>${token}</code>

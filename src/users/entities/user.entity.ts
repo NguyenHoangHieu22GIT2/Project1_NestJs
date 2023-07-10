@@ -87,7 +87,7 @@ UserSchema.methods.addToCart = function (productId: string, quantity: number) {
   } else {
     cartItems.push({
       productId: productId,
-      quantity: newQuantity,
+      quantity: quantity,
     });
   }
 

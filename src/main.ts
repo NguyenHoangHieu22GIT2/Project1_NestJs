@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import * as graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { json } from 'express';
-
+import { faker } from '@faker-js/faker';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors();

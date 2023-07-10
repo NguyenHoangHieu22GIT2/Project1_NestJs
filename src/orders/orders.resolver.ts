@@ -21,12 +21,14 @@ export class OrdersResolver {
   }
 
   @Query(() => [Order], { name: 'orders' })
-  findAll() {
-    return this.ordersService.findAll();
+  async findAll(@userDecorator() user: User) {
+    const orders = await this.ordersService.findAll(user);
+    console.log(orders);
+    return orders;
   }
 
-  @Query(() => Order, { name: 'order' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.ordersService.findOne(id);
-  }
+  // @Query(() => Order, { name: 'order' })
+  // findOne(@Args('id', { type: () => Int }) id: number) {
+  //   return this.ordersService.findOne(id);
+  // }
 }
