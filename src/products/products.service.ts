@@ -30,6 +30,101 @@ export class ProductsService {
     private readonly csrfService: CsrfService,
   ) {}
 
+  async getHasSoldDate(user: User) {
+    const products = await this.productModel.find({ userId: user._id });
+    const date = new Date();
+    const dateYears: { year: number; solds: number }[] = [];
+    const dateMonths: { month: number; solds: number }[] = [];
+    const dateDays: { day: number; solds: number }[] = [];
+    for (let i = 0; i < 31; i++) {
+      if (i < 5) {
+        dateYears.push({ year: date.getFullYear() - i, solds: 0 });
+      }
+      if (i < 12) {
+        dateMonths.push({ month: i + 1, solds: 0 });
+      }
+      // 31 ngay: 1,3,5,7,8,10,12
+      // 30 ngay: 4,6,7,11
+      // 29 ngay: 2
+      // _1 2 _3 _4 _5 _6 _7 _8 9 _10 11 _12
+      switch (date.getMonth() + 1) {
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 8:
+        case 10:
+        case 12:
+          if (i < 31) {
+            dateDays.push({ day: i + 1, solds: 0 });
+          }
+          break;
+        case 4:
+        case 6:
+        case 9:
+        case 11:
+          if (i < 30) {
+            dateDays.push({ day: i + 1, solds: 0 });
+          }
+          break;
+        case 2:
+          if (i < 28) {
+            dateDays.push({ day: i + 1, solds: 0 });
+          }
+          break;
+      }
+    }
+    // console.log(dateYears, dateMonths, dateDays);
+    products.forEach((product) => {
+      product.hasSold.forEach((sold) => {
+        if (sold.date.getFullYear() >= date.getFullYear() - 5) {
+          dateYears.forEach((year, index) => {
+            if (sold.date.getFullYear() == year.year) {
+              dateYears[index].solds += sold.quantity;
+            }
+          });
+        }
+        if (sold.date.getFullYear() === date.getFullYear()) {
+          dateMonths.forEach((month, index) => {
+            if (sold.date.getMonth() + 1 == month.month) {
+              dateMonths[index].solds += sold.quantity;
+            }
+          });
+        }
+        if (sold.date.getFullYear() === date.getFullYear()) {
+          dateDays.forEach((day, index) => {
+            if (sold.date.getDate() == day.day) {
+              dateDays[index].solds += sold.quantity;
+            }
+          });
+        }
+      });
+    });
+    return {
+      dateYears,
+      dateMonths,
+      dateDays,
+    };
+  }
+
+  async addHasSold(
+    productId: string,
+    date: Date,
+    quantity: number,
+    user: User,
+  ) {
+    const product = await this.productModel.findById(productId);
+    if (!product) {
+      throw new BadRequestException('No Product Found to be Ordered');
+    }
+    product.hasSold.push({
+      date,
+      quantity,
+      userId: user._id,
+    });
+    return product.save();
+  }
+
   async create(createProductInput: CreateProductInput, user: User) {
     await this.csrfService.verifyToken(createProductInput.token, user._id);
     const product = this.productModel.create({
@@ -62,10 +157,28 @@ export class ProductsService {
     user: User,
   ) {
     const date = new Date();
+    let ableToRate = false;
     const product = await this.findById(productId);
+    for (let index = 0; index < product.hasSold.length; index++) {
+      const sold = product.hasSold[index];
+      if (sold.userId.toString() === user._id.toString()) {
+        ableToRate = true;
+        break;
+      }
+    }
+    // product.hasSold.forEach(sold=>{
+    //   if(sold.userId.toString() === user._id.toString()) {
+    //     ableToRate = true;
+    //     return;
+    //   }
+    // })
     if (!product) {
       throw new BadRequestException('No Product Found!');
     }
+    if (!ableToRate) {
+      throw new BadRequestException('You need to buy before rating.');
+    }
+
     product.ratings.push({
       rating,
       userId: user._id,
@@ -246,12 +359,23 @@ export class ProductsService {
   async update(updateProductInput: UpdateProductInput, user: User) {
     await this.csrfService.verifyToken(updateProductInput.token, user._id);
     const product = await this.findById(updateProductInput._id);
-    if (product.userId !== user._id)
+    if (product.userId.toString() !== user._id.toString())
       throw new BadRequestException('Not your products fools');
-    return this.productModel.findByIdAndUpdate(
-      updateProductInput._id,
-      updateProductInput,
-    );
+    const images = product.images;
+    Object.assign(product, updateProductInput);
+
+    if (updateProductInput.images.length > 0) {
+      product.images.forEach((image) => {
+        unlink(join(process.cwd(), `./src/upload/${image}`), () => {});
+      });
+    } else {
+      product.images = images;
+    }
+    return product.save();
+    // return this.productModel.findByIdAndUpdate(
+    //   updateProductInput._id,
+    //   updateProductInput,
+    // );
   }
 
   async getCartItems(userId: string) {
@@ -268,14 +392,12 @@ export class ProductsService {
     if (!product) {
       throw new BadRequestException('No product Found!');
     }
-    if (product.userId !== user._id)
+    if (product.userId.toString() !== user._id.toString()) {
       throw new BadRequestException('Not your products fools');
-    return product.images.forEach((image) => {
-      return unlink(join(process.cwd(), `./src/upload/${image}`), () => {
-        return this.productModel.findByIdAndDelete(
-          removeProductInput.productId,
-        );
-      });
+    }
+    product.images.forEach((image) => {
+      unlink(join(process.cwd(), `./src/upload/${image}`), () => {});
     });
+    return this.productModel.findByIdAndDelete(removeProductInput.productId);
   }
 }

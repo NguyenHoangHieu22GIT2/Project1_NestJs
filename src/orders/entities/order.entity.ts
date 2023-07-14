@@ -20,7 +20,7 @@ export class Order {
         images: { type: [String], required: true },
         quantity: { type: Number, required: true },
         discount: { type: Number, required: false },
-        _id: { type: mongoose.Types.ObjectId, required: true },
+        _id: { type: mongoose.Types.ObjectId, required: true, ref: 'Product' },
       },
     ],
     _id: false,
@@ -28,8 +28,12 @@ export class Order {
   products: [];
 
   @Field(() => String)
-  @Prop({ required: true, ref: 'User' })
+  @Prop({ required: true, ref: 'User', type: mongoose.Types.ObjectId })
   userId: string;
+
+  @Field(() => Date)
+  @Prop({ required: true, type: Date })
+  date: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

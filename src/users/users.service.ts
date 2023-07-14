@@ -75,6 +75,11 @@ export class UsersService {
   async addToCart({ productId, quantity }: AddToCartInput, user: User) {
     // await this.csrfService.verifyToken(token, user._id);
     const product = await this.productService.findById(productId);
+    if (product.stock < quantity) {
+      throw new BadRequestException(
+        'The stock is less than the quantities you want to put in the cart!',
+      );
+    }
     user.addToCart(product._id, quantity);
     return product;
   }

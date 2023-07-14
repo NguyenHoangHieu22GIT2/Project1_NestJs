@@ -13,7 +13,7 @@ export class OrdersService {
     private readonly productService: ProductsService,
     @InjectModel(Order.name) private readonly orderModel: Model<Order>,
   ) {}
-  async create(user: User) {
+  async create(date: Date, user: User) {
     if (user.cart.items.length <= 0) {
       throw new BadRequestException('No Cart Item to order');
     }
@@ -21,17 +21,25 @@ export class OrdersService {
       const productId = item.productId.toString();
       const product = await this.productService.findById(productId);
       product.quantity = item.quantity;
-      console.log(product);
       return product;
     });
     const products = await Promise.all(promises);
     user.clearCart();
-    return this.orderModel.create({ products, userId: user._id });
+    products.forEach(async (product) => {
+      await this.productService.addHasSold(
+        product._id,
+        date,
+        product.quantity,
+        user,
+      );
+      product.stock -= product.quantity;
+      await product.save();
+    });
+    return this.orderModel.create({ products, userId: user._id, date: date });
   }
 
   findAll(user: User) {
-    console.log(user);
-    return this.orderModel.find({ userId: user._id.toString() });
+    return this.orderModel.find({ userId: user._id });
   }
 
   findOne(id: number) {

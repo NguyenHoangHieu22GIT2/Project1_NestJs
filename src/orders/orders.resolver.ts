@@ -17,13 +17,13 @@ export class OrdersResolver {
 
   @Mutation(() => Order)
   createOrder(@userDecorator() user: User) {
-    return this.ordersService.create(user);
+    return this.ordersService.create(new Date(), user);
   }
 
   @Query(() => [Order], { name: 'orders' })
   async findAll(@userDecorator() user: User) {
     const orders = await this.ordersService.findAll(user);
-    console.log(orders);
+    console.log('This is your orders', orders);
     return orders;
   }
 

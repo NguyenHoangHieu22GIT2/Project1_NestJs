@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Csrf } from './entities/csrf.entity';
 import { Model } from 'mongoose';
@@ -8,7 +12,7 @@ import { randomBytes } from 'crypto';
 export class CsrfService {
   constructor(
     @InjectModel(Csrf.name) private readonly csrfModel: Model<Csrf>,
-  ) { }
+  ) {}
 
   async createToken(userId: string) {
     return this.removeToken(userId).then(() => {
@@ -20,7 +24,7 @@ export class CsrfService {
   async verifyToken(token: string, userId: string) {
     const csrf = await this.checkToken(token, userId);
     if (!csrf) {
-      throw new UnauthorizedException('You can not make this request');
+      throw new BadRequestException('You can not make this request');
     }
     await this.removeToken(userId);
   }
@@ -31,6 +35,7 @@ export class CsrfService {
 
   async checkToken(token: string, userId: string) {
     const csrf = await this.csrfModel.findOne({ token });
+    console.log(csrf);
     if (
       !(
         csrf &&
@@ -38,7 +43,7 @@ export class CsrfService {
         csrf.userId.toString() === userId.toString()
       )
     ) {
-      throw new UnauthorizedException("You don't have the token or the UserId");
+      throw new BadRequestException("You don't have the token or the UserId");
     } else {
       return csrf;
     }

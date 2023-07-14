@@ -75,6 +75,9 @@ export class MessagesService {
   }
 
   async sendMessage({ date, roomId, senderId, message }: CreateMessageDto) {
+    if (!roomId || !senderId || !message || !date) {
+      throw new BadRequestException('No user to talk to!');
+    }
     const room = await this.messageModel.findOne({ roomId });
     const theMessage = {
       date,

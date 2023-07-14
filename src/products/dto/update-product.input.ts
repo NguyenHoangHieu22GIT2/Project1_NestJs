@@ -11,13 +11,15 @@ export class UpdateProductInput extends PartialType(CreateProductInput) {
   price: number;
   @Field({ nullable: true, description: 'description of the product' })
   description: string;
-  @Field({ nullable: true, description: 'image Url of the product' })
-  imageUrl: string;
+  @Field(() => [String], {
+    nullable: true,
+    description: 'images of the product',
+  })
+  images: string[];
   @Field({ description: 'CsrfToken' })
   token: string;
   @Field(() => Int, { description: 'Stock', nullable: true })
   stock: number;
   @Field(() => Int, { description: 'discount', nullable: true })
   discount: number;
-
 }

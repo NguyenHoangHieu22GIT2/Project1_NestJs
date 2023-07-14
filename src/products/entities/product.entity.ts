@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Schema as SchemaType } from 'mongoose';
 import { Rating } from './rating.type';
 import { User } from 'src/users/entities/user.entity';
+import { HasSold } from './HasSold.type';
 
 export type ProductDocument = HydratedDocument<Product>;
 @ObjectType()
@@ -100,9 +101,32 @@ export class Product {
   @Prop({ required: true, type: Number, default: 0 })
   discount: number;
 
-  @Field(() => Int, { description: 'has Sold of the product' })
-  @Prop({ required: true, type: Number, default: 0 })
-  hasSold: number;
+  @Field(() => [HasSold], {
+    description: 'has Sold of the product',
+    defaultValue: [],
+  })
+  @Prop({
+    required: true,
+    type: [
+      {
+        userId: {
+          type: mongoose.Types.ObjectId,
+          required: true,
+          ref: 'User',
+        },
+        date: {
+          type: Date,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
+    default: [],
+  })
+  hasSold: HasSold[];
   // @Field(() => [TagType])
   // @Prop({
   //   type: [

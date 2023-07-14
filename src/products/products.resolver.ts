@@ -1,4 +1,11 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  Int,
+  ResolveField,
+} from '@nestjs/graphql';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
 import { CreateProductInput } from './dto/create-product.input';
@@ -22,6 +29,15 @@ import { ProductCountInput } from './dto/product-count.input';
 export class ProductsResolver {
   constructor(private readonly productsService: ProductsService) {}
 
+  @Query(() => String)
+  @ResolveField(() => String)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(AuthGuard)
+  async getSoldDate(@userDecorator() user: User) {
+    const result = await this.productsService.getHasSoldDate(user);
+    return JSON.stringify(result);
+  }
+
   @Mutation(() => Product)
   @UseInterceptors(AuthInterceptor)
   @UseGuards(AuthGuard)
@@ -29,7 +45,9 @@ export class ProductsResolver {
     @Args('createProductInput') createProductInput: CreateProductInput,
     @userDecorator() user: User,
   ) {
+    console.log('Hello');
     const result = await this.productsService.create(createProductInput, user);
+
     return result;
   }
 
@@ -179,12 +197,14 @@ export class ProductsResolver {
   @Mutation(() => Product)
   @UseInterceptors(AuthInterceptor)
   @UseGuards(AuthGuard)
-  removeProduct(
+  async removeProduct(
     @Args('removeProductInput', { type: () => RemoveProductInput })
     removeProductInput: RemoveProductInput,
     @userDecorator() user: User,
   ) {
-    return this.productsService.remove(removeProductInput, user);
+    const result = await this.productsService.remove(removeProductInput, user);
+    console.log(result);
+    return result;
   }
 
   @Query(() => Int)

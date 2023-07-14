@@ -42,7 +42,7 @@ export class MessagesGateway
         userId,
       );
       this.connectedUsers.set(userId, socket);
-      await this.userService.updateOnline(userId, true);
+      // await this.userService.updateOnline(userId, true);
       this.connectedUsers.forEach((socket, userIdentification) => {
         allFriendUsers.forEach((user) => {
           if (user._id.toString() === userIdentification.toString()) {
@@ -60,7 +60,7 @@ export class MessagesGateway
       const allFriendUsers = await this.messagesService.getAllUserInRoom(
         userId,
       );
-      await this.userService.updateOnline(userId, false);
+      // await this.userService.updateOnline(userId, false);
       this.connectedUsers.delete(userId);
       this.connectedUsers.forEach((socket, userIdentification) => {
         allFriendUsers.forEach((user) => {
