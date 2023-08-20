@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { User, UserDocument } from './entities/user.entity';
 import { UpdateUserInput } from './dto/update-user.input';
 import { AuthService } from './auth.service';
-import { Injectable, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Header, Injectable, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from './auth.guard';
 import { AuthInterceptor } from './Interceptor/auth.interceptor';
 import { userDecorator } from './decorators/user.decorator';

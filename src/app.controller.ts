@@ -41,6 +41,10 @@ export class AppController {
     private readonly appService: AppService,
     private readonly authService: AuthService,
   ) {}
+  @Get()
+  deploy() {
+    return 'Hello World';
+  }
   @Get('test')
   test() {
     const email = faker.internet.email();
