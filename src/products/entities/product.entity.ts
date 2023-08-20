@@ -4,7 +4,7 @@ import mongoose, { HydratedDocument, Schema as SchemaType } from 'mongoose';
 import { Rating } from './rating.type';
 import { User } from 'src/users/entities/user.entity';
 import { HasSold } from './HasSold.type';
-
+import { Options } from './options.type';
 export type ProductDocument = HydratedDocument<Product>;
 @ObjectType()
 @Schema()
@@ -127,6 +127,25 @@ export class Product {
     default: [],
   })
   hasSold: HasSold[];
+
+  @Field(() => [Options])
+  @Prop({
+    type: [
+      {
+        optionName: {
+          type: String,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+        _id: false,
+      },
+    ],
+  })
+  options: Options[];
+
   // @Field(() => [TagType])
   // @Prop({
   //   type: [

@@ -126,7 +126,7 @@ export class ProductsService {
   }
 
   async create(createProductInput: CreateProductInput, user: User) {
-    await this.csrfService.verifyToken(createProductInput.token, user._id);
+    // await this.csrfService.verifyToken(createProductInput.token, user._id);
     const product = this.productModel.create({
       ...createProductInput,
       images: createProductInput.images,

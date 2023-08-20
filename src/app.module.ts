@@ -13,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
 import { FavoriteProductsModule } from './favorite-products/favorite-products.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { MessagesModule } from './messages/messages.module';
+import { AuctionProductModule } from './auction-product/auction-product.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { MessagesModule } from './messages/messages.module';
     CsrfModule,
     FavoriteProductsModule,
     MessagesModule,
+    AuctionProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],

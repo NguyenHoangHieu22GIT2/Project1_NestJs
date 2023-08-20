@@ -10,12 +10,53 @@ input AddToCartInput {
   quantity: Float!
 }
 
+type AuctionProduct {
+  """Product Id"""
+  _id: String!
+
+  """description of the product"""
+  description: String!
+
+  """End Of the auction"""
+  endOfAuction: String!
+
+  """Images of the product"""
+  images: [String!]!
+
+  """List of user Has bid in the auction"""
+  listOfUsersBid: [UserBid!]!
+
+  """price of the product"""
+  price: Float!
+
+  """Title of the product"""
+  title: String!
+
+  """user Id"""
+  userId: String!
+}
+
 input CheckTokenInput {
   """The Token To Check"""
   token: String!
 
   """The userId To Check"""
   userId: String!
+}
+
+input CreateAuctionProductInput {
+  """description of the product"""
+  description: String!
+
+  """End Of the auction"""
+  endOfAuction: String
+  images: [String!]!
+
+  """price of the product"""
+  price: Float!
+
+  """Title of the product"""
+  title: String!
 }
 
 input CreateProductInput {
@@ -26,14 +67,14 @@ input CreateProductInput {
   discount: Int
   images: [String!]
 
+  """Tag Options"""
+  options: [OptionsType!]
+
   """price of the product"""
   price: Float!
 
   """Stock"""
   stock: Int!
-
-  """Tag Options"""
-  tags: [TagInput!]
 
   """Title of the product"""
   title: String!
@@ -167,6 +208,7 @@ type MessageTypeHistory {
 type Mutation {
   AddRating(createRatingInput: CreateRatingInput!): Rating!
   addToCart(addToCartInput: AddToCartInput!): Product!
+  createAuctionProduct(createAuctionProductInput: CreateAuctionProductInput!): AuctionProduct!
   createCsrfToken(userId: String!): Csrf!
   createOrder: Order!
   createProduct(createProductInput: CreateProductInput!): Product!
@@ -180,6 +222,22 @@ type Mutation {
   toggleUpvote(toggleUpvoteInput: ToggleVoteInput!): Rating!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
   updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+type Options {
+  """optionName"""
+  optionName: String!
+
+  """Price"""
+  price: Float!
+}
+
+input OptionsType {
+  """optionName"""
+  optionName: String!
+
+  """Price"""
+  price: Float!
 }
 
 type Order {
@@ -203,6 +261,7 @@ type Product {
   """has Sold of the product"""
   hasSold: [HasSold!]!
   images: [String!]!
+  options: [Options!]!
 
   """price of the product"""
   price: Float!
@@ -323,14 +382,6 @@ input ResetPasswordInput {
   userId: String!
 }
 
-input TagInput {
-  """name"""
-  name: String!
-
-  """Options"""
-  options: [String!]!
-}
-
 input ToggleFavoriteProductInput {
   """Product Id"""
   productId: String!
@@ -360,14 +411,14 @@ input UpdateProductInput {
   """images of the product"""
   images: [String!]
 
+  """Options"""
+  options: [OptionsType!]
+
   """price of the product"""
-  price: Int
+  price: Float
 
   """Stock"""
   stock: Int
-
-  """Tag Options"""
-  tags: [TagInput!]
 
   """Title of the product"""
   title: String
@@ -409,8 +460,22 @@ type User {
   """password of the user"""
   password: String!
 
+  """Reputation"""
+  reputation: Int!
+
+  """revenue"""
+  revenue: Int!
+
   """username of the user"""
   username: String!
+}
+
+type UserBid {
+  """The money that the user has bid"""
+  price: Float!
+
+  """user Id Has bid in the auction"""
+  userId: String!
 }
 
 type jwtToken {

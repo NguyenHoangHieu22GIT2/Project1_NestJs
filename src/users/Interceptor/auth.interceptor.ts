@@ -16,7 +16,6 @@ export class AuthInterceptor implements NestInterceptor {
   ) {}
   async intercept(context: ExecutionContext, next: CallHandler<any>) {
     const req = GqlExecutionContext.create(context).getContext().req;
-
     const token = req.token.split(' ')[1];
     const payload = await this.authService.validate(token);
     const user = await this.usersService.findById(payload._id);

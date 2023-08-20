@@ -1,3 +1,4 @@
+import { OptionsType } from '../entities/options.type';
 import { CreateProductInput } from './create-product.input';
 import { InputType, Field, Int, PartialType } from '@nestjs/graphql';
 
@@ -7,8 +8,8 @@ export class UpdateProductInput extends PartialType(CreateProductInput) {
   _id: string;
   @Field({ nullable: true, description: 'Title of the product' })
   title: string;
-  @Field(() => Int, { nullable: true, description: 'price of the product' })
-  price: number;
+  // @Field(() => Int, { nullable: true, description: 'price of the product' })
+  // price: number;
   @Field({ nullable: true, description: 'description of the product' })
   description: string;
   @Field(() => [String], {
@@ -22,4 +23,8 @@ export class UpdateProductInput extends PartialType(CreateProductInput) {
   stock: number;
   @Field(() => Int, { description: 'discount', nullable: true })
   discount: number;
+  @Field(() => [OptionsType], { description: 'Options', nullable: true })
+  options?: OptionsType[];
+  // @Field(() => String, { description: 'Type Of Product', nullable: true })
+  // typeOfProduct: string;
 }

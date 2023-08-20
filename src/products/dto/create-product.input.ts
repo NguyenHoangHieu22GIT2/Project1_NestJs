@@ -1,5 +1,5 @@
 import { InputType, Int, Field, Float } from '@nestjs/graphql';
-import { TagInput, TagType } from '../entities/tags.type';
+import { OptionsType } from '../entities/options.type';
 @InputType()
 export class CreateProductInput {
   @Field({ description: 'Title of the product' })
@@ -16,6 +16,8 @@ export class CreateProductInput {
   stock: number;
   @Field(() => Int, { description: 'discount', nullable: true })
   discount: number;
-  @Field(() => [TagInput], { description: 'Tag Options', nullable: true })
-  tags: { name: string; options: string[] }[];
+  @Field(() => [OptionsType], { description: 'Tag Options', nullable: true })
+  options: OptionsType[];
+  // @Field(() => String, { description: 'Type Of Product' })
+  // typeOfProduct: string;
 }

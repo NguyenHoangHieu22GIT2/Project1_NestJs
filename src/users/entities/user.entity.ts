@@ -66,6 +66,14 @@ export class User {
   @Prop({ required: true, type: Boolean, default: false })
   isOnline: boolean;
 
+  @Field(() => Int, { description: 'Reputation' })
+  @Prop({ required: true, type: Number, default: 100 })
+  reputation: number;
+
+  @Field(()=>Int,{description:"revenue"})
+  @Prop({required:true,type:Number,default:0})
+  revenue:number;
+
   addToCart: (productId: string, quantity: number) => {};
   removeItemFromCart: (productId: string, quantity: number) => {};
   clearCart: () => {};
