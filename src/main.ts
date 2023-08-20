@@ -6,7 +6,12 @@ import { json } from 'express';
 import { faker } from '@faker-js/faker';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.enableCors();
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
+
   app.use(json({ limit: '50mb' }));
   app.use(graphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 10 }));
   app.useStaticAssets(`src/upload/`, { prefix: '/upload/' });

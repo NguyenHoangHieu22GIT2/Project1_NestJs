@@ -25,6 +25,10 @@ import { AuctionProductModule } from './auction-product/auction-product.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
+      cors: {
+        credentials: true,
+        origin: true,
+      },
     }),
     MongooseModule.forRoot(process.env.DATABASE_URI, {
       dbName: process.env.DATABASE_NAME,
